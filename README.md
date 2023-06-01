@@ -434,3 +434,7 @@ This behavior is so common because it's specified in *POSIX*, an old standard de
 > *Source: <cite>[Shell Command Language, POSIX.1-2017](https://pubs.opengroup.org/onlinepubs/9699919799.2018edition/utilities/V3_chap02.html#tag_18_09_01_01)</cite>*
 
 Computers are so cool!
+
+## To be continued...
+
+Part 4 is being written in the [part-4](https://github.com/hackclub/putting-the-you-in-cpu/tree/part-4) branch.
