@@ -435,6 +435,46 @@ This behavior is so common because it's specified in *POSIX*, an old standard de
 
 Computers are so cool!
 
-## To be continued...
+## Part 4: Becoming an Elf-Lord
 
-Part 4 is being written in the [part-4](https://github.com/hackclub/putting-the-you-in-cpu/tree/part-4) branch.
+*nb: this needs heavy rewrites because it's wrong and oversimplifies the structure of elf headers!*
+
+We pretty thoroughly understand `execve` now. At the end of most paths, the kernel will reach a final program containing machine code for it to launch. Typically, a setup process is required before actually jumping to the code— for example, global program memory has to be set up. Because of this, we use special file formats that specify all of this setup process. While Linux supports many, the most common format by far is *ELF* (executable and linkable format).
+
+ELF binaries are handled by the `binfmt_elf` handler, which is more complex than many other handlers, containing many hundreds of lines of code. The process of loading an ELF file is generally as follows.
+
+### Reading the Header
+
+ELF files start with a header section containing non-executable information for loading the code. The kernel cares about two main pieces of the header.
+
+The `PT_LOAD` header value points to data in the ELF binary to load into memory as static data. These loadable parts include:
+
+- Machine code to be loaded into memory and executed on the CPU. `SHT_PROGBITS` type with the `SHF_EXECINSTR` flag to mark it as executable, and the `SHF_ALLOC` flag which just means it will be loaded into memory for execution.
+- Initialized data hardcoded in the executable to be loaded into memory. If you write low-level code, this is where statics go. This is also `SHT_PROGBITS`; this section type just means "information for the program".  The flags are `SHF_ALLOC` and `SHF_WRITE` to mark it as writeable.
+- Some other global data needs memory space but starts out empty— it would be a waste to include a bunch of empty bytes in the ELF file, so this is specified in a special section called *BSS* which only includes the length to be allocated. This is of type `SHT_NOBITS`, but also `SHF_ALLOC` and `SHF_WRITE`.
+
+ELF headers also often include a `PT_INTERP` header which specifies a dynamic linking runtime. What... is... dynamic linking?
+
+### A Brief Explanation of Linking 
+
+Before we talk about *dynamic* linking, let's talk about linking in general. Programmers tend to build their programs on top of libraries of reusable code— libc, for example. When building a binary, all these references to external code need to be resolved so that code can be included in the binary. This process is called *static linking*.
+
+However, some libraries are very common. You'll find libc is used by basically every program; it includes an interface for using syscalls! It would be a stupid use of space to include a separate copy of libc in every single program on your computer. Also, it might be nice if bugs in libraries could be fixed without recompiling and updating everything.  The solution to this is beloved dynamic linking.
+
+Dynamically linked binaries leave out some of their dependencies, only including named pointers to the methods and libraries they need. These libraries are (hopefully) installed on the computer running the program, which *dynamically* loads the required code when the program is being run. This means if that library is changed, for example, that new code will be loaded the next time the program runs! No change in the program needed. These typically take the form of .so (Shared Object) files on Linux, .dll (Dynamic Link Library) files on Windows, and .dylib (DYnamically linked LIBrary) on macOS.
+
+There is another important difference between static and dynamic linking. With static linking, only the portions of the library that are used are included in the executable and thus loaded into memory. With dynamic linking, the *entire library* is loaded into memory. This is because modern operating systems can save more than disk space with dynamic linking— they can share the *memory* of libraries as well. This only applies to code, since the library should be able to have different state for different processes, but those savings can still be substantial. However, this does mean the whole library has to be loaded; if only the used segments were loaded, internal references (jumps, for example) wouldn't line up if different segments were loaded non-contiguously by different processes.
+
+### Execution
+
+Let's hop on back to the kernel running ELF files: if the binary it's executing is dynamically linked, the OS can't just jump to the binary's code right away because there would be missing code. Instead, it needs to run a special program which will figure out what libraries are needed, load them, replace all the named pointers with actual jump instructions, and *then* start the actual program code. This loader might vary across systems, so its path (typically something like `/lib64/ld-linux-x86-64.so.2`) is specified by the ELF file in the `PT_INTERP` header field.
+
+After reading the ELF header, the kernel has all the information it needs to set up the memory structure for the new program. It starts by loading the program's static data, BSS space, and machine code into memory. If the program is dynamically linked, the kernel has to run `PT_INTERP` first. In this case, it'll also load the ELF interpreter's data, BSS, and code into wherever it fits in memory.
+
+Now the kernel needs to store the instruction pointer which will be restored when returning to userland. If this executable is dynamically linked, the kernel sets the instruction pointer to the start of the ELF interpreter's code in memory. Otherwise, the kernel sets it to the start of the executable.
+
+About now is where the kernel pushes some `argc`, `argv`, and environment variables to the stack for the new process to handle.
+
+Before handling a syscall, the kernel stores the current value of registers to the stack to be restored when switching back to user space. The kernel now zeroes this part of the stack and returns to user space. The registers are restored, emptied, and the kernel jumps to the stored instruction pointer which is now the starting point of the new program!
+
+## To be continued...
