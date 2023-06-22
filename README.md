@@ -100,7 +100,9 @@ If you've ever written code that interacts with the OS, you'll probably recogniz
 User space to kernel space control transfers are accomplished using a processor feature called *software interrupts*:
 
 1. During the boot process, the operating system stores a table called an *interrupt vector table* (x86-64 calls this the interrupt descriptor table) in RAM and registers it with the CPU. The IVT maps interrupt numbers to handler code pointers.
+
   <div align='center'><img src='https://doggo.ninja/lmiysV.png' width='250' /></div>
+
 2. Then, userland programs can use an instruction like [INT](https://www.felixcloutier.com/x86/intn:into:int3:int1) which tells the processor to look up the given interrupt number in the IVT, switch to kernel mode, and then jump the instruction pointer to the memory address stored in the IVT.
 
 When this kernel code finishes, it tells the CPU to switch back to user mode and return the instruction pointer to where it was when the interrupt was triggered. This is accomplished using an instruction like [IRET](https://www.felixcloutier.com/x86/iret:iretd:iretq).
