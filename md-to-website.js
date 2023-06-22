@@ -77,7 +77,7 @@ text = text.replace(/^[\s\S]+?<!-- *begin article \(do not remove\) *-->\s*/, ''
 text = `
 ---
 title: Putting the "You" in CPU
-abstract: 'Do you fully understand how software on your computer runs? I didn\'t, so I dove down a research rabbit hole to write the article that I wish I had. This article covers everything I learned about the innate details of multiprocessing, memory management, system calls, and hardware interrupts — and more importantly, how all of that connects to programs running in the real world!'
+abstract: "Do you fully understand how software on your computer runs? I didn't, so I dove down a research rabbit hole to write the article that I wish I had. This article covers everything I learned about the innate details of multiprocessing, memory management, system calls, and hardware interrupts — and more importantly, how all of that connects to programs running in the real world!"
 date: '2023-06-22'
 draft: false
 slug: putting-the-you-in-cpu
