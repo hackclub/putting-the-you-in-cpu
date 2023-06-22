@@ -13,9 +13,9 @@ And you know what they say... you only truly understand something if you can exp
 
 ## Part 1: The "Basics"
 
-My repeated epiphany while creating this article was how *simple* computers really are. I think the hardest thing for me was not psyching myself out by expecting more complexity than exists in reality. Modern computer architecture can be beautiful in its simplicity. Try not to psych yourself out; if at any point you catch yourself expecting more abstraction or complexity, it probably is actually that simple!
+The one thing that surprised me over and over again while writing this article was how *simple* computers are. It's still hard for me not to psych myself out, expecting more complexity or abstraction than actually exists! If there's one thing you should burn into your brain before continuing, it's that everything that seems simple actually is that simple. This simplicity is very beautiful and sometimes very, very cursed.
 
-Let us begin by reviewing how your computer works at its very core.
+Let's start with the basics of how your computer works at its very core.
 
 ### How Computers Are Architected
 
@@ -67,7 +67,7 @@ For me, this raises more questions than it answers:
 2. If programs run directly on the CPU, and the CPU can directly access RAM, why can't code access memory from other processes, or, god forbid, the kernel?
 3. Speaking of which, what's the mechanism that prevents every process from running any instruction and doing anything to your computer? AND WHAT'S A DAMN SYSCALL?
 
-The memory question is more complicated than you might expect — most memory accesses actually go through a layer misdirection that remap the entire address space. For now, I'm going to pretend that programs can access all RAM directly and computers can only run one process at once. We'll explain away both of these assumptions in time.
+The section question about memory deserves its own section and is covered in part 5 — the TL;DR is that most memory accesses actually go through a layer of misdirection that remaps the entire address space. For now, we're going to pretend that programs can access all RAM directly and computers can only run one process at once. We'll explain away both of these assumptions in time.
 
 It's time to leap through our first rabbit hole into a land filled with syscalls and security rings.
 
@@ -84,6 +84,8 @@ It's time to leap through our first rabbit hole into a land filled with syscalls
 The *mode* (sometimes called privilege level or ring) a processor is in controls what it's allowed to do. Modern architectures have at least two options: kernel/supervisor mode and user mode. While an architecture might support more than two modes, only kernel mode and user mode are commonly used these days.
 
 In kernel mode, anything goes: the CPU is allowed to execute any supported instruction and access any memory. In user mode, only a subset of instructions is allowed, I/O and memory access is limited, and many CPU settings are locked. Generally, operating systems and drivers run in kernel mode while applications run in user mode.
+
+Processors start in kernel mode. Before executing a program, the kernel initiates the switch to user mode.
 
 <p align='center'>
 	<img src='https://doggo.ninja/C9ENjY.png' width='500' />
@@ -573,7 +575,7 @@ However, some libraries are super common. You'll find libc is used by basically 
 
 If a statically linked program needs a function `foo` from a library called `bar`, the program would include a copy of the entirety of `foo`. However, if it's dynamically linked it would only include a reference saying "I need `foo` from library `bar`." When the program is run, `bar` is hopefully installed on the computer and the `foo` function's machine code can be loaded into memory on-demand. If the computer's installation of the `bar` library is updated, the new code will be loaded the next time the program runs without needing any change in the program itself.
 
-<img src='https://doggo.ninja/tQZDJ0.png' />
+<img src='https://doggo.ninja/e5Ed9l.png' />
 
 ### Dynamic Linking in the Wild
 
@@ -601,7 +603,7 @@ Finally, the syscall is over and the kernel returns to userland. It restores the
 
 ## Part 5: The Translator in Your Computer
 
-Up until now, every time I've talked about reading and writing memory has been pretty wishy-washy. ELF files specify specific memory addresses to load data into, so why aren't there problems with different processes trying to use conflicting memory? Why does each process seem to have a different memory environment?
+Up until now, every time I've talked about reading and writing memory was a little wishy-washy. ELF files specify specific memory addresses to load data into, so why aren't there problems with different processes trying to use conflicting memory? Why does each process seem to have a different memory environment?
 
 Also, how exactly did we get here? We understand that `execve` is a syscall that *replaces* the current process with a new program, but this doesn't explain how multiple processes can be started. It definitely doesn't explain how the very first program runs — what chicken (process) lays (spawns) all the other eggs (other processes)?
 
