@@ -468,9 +468,9 @@ Computers are so cool!
 	</p>
 </p>
 <div align='center'>
-	<div style='margin-top: -10px;'>
+	<p style='margin-top: -10px;'>
 		(Thank you to <a href='https://ncase.me/' target='_blank'>Nicky Case</a> for the adorable drawing.)
-	</div>
+	</p>
 </div>
 
 We pretty thoroughly understand `execve` now. At the end of most paths, the kernel will reach a final program containing machine code for it to launch. Typically, a setup process is required before actually jumping to the code — for example, different parts of the program have to be loaded into the right places in memory. Each program needs different amounts of memory for different things, so we have standard file formats that specify how to set up a program for execution. While Linux supports many such formats, the most common format by far is *ELF* (executable and linkable format).
