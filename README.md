@@ -565,7 +565,7 @@ However, some libraries are super common. You'll find libc is used by basically 
 
 If a statically linked program needs a function `foo` from a library called `bar`, the program would include a copy of the entirety of `foo`. However, if it's dynamically linked it would only include a reference saying "I need `foo` from library `bar`." When the program is run, `bar` is hopefully installed on the computer and the `foo` function's machine code can be loaded into memory on-demand. If the computer's installation of the `bar` library is updated, the new code will be loaded the next time the program runs without needing any change in the program itself.
 
-[Missing diagram: static vs dynamic linking. Static linking is on left with a function being copied into different files, and dynamic linking is on the right with pointers.]
+<img src='https://doggo.ninja/tQZDJ0.png' />
 
 ### Dynamic Linking in the Wild
 
