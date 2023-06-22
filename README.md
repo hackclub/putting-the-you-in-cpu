@@ -616,7 +616,7 @@ This dictionary is actually called a *page table*, and this system of translatin
 The page table itself just resides in physical RAM. While it can contain millions of entries, each entry's size is only on the order of a couple bytes, so the page table doesn't take up too much space.
 
 <p align='center'>
-	<img src='https://doggo.ninja/JAsawH.png' width='600' />
+	<img src='https://doggo.ninja/2qY74r.png' width='600' />
 </p>
 
 A great feature of paging is that the page table can be edited while the computer is running. This is what allows each process to have its own isolated memory space. When the OS switches context from one process to another, an important task is remapping the virtual memory space to a different area in physical memory. Let's say you have two processes: process A can have its code and data (likely loaded from an ELF file!) at `0x00200000`, and process B can access its code and data from the very same address. Those two processes can even be the same program, because they aren't actually fighting over that address range! The data for process A is somewhere far from process B in physical memory, and is mapped to `0x00200000` by the kernel when switching to the process.
