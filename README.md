@@ -37,9 +37,9 @@ RAM is your computer's main memory bank, a large multi-purpose space which store
 
 The CPU stores an *instruction pointer* which points to the location in RAM that it's going to fetch the next instruction from. After executing each instruction, the CPU moves the pointer and repeats. This is the *fetch-execute cycle*.
 
-<div align='center'>
+<p align='center'>
 	<img src='https://doggo.ninja/23nqBP.png' width='360' />
-</div>
+</p>
 
 After executing an instruction, the pointer moves forward to immediately after the instruction in RAM so that it now points to the next instruction. That's why code runs! The instruction pointer just keeps chugging forward, executing machine code in the order in which it's in memory. Some instructions can tell the instruction pointer to jump somewhere else instead, or jump different places depending on a certain condition; this makes reusable code and conditional logic possible.
 
@@ -85,9 +85,9 @@ The *mode* (sometimes called privilege level or ring) a processor is in controls
 
 In kernel mode, anything goes: the CPU is allowed to execute any supported instruction and access any memory. In user mode, only a subset of instructions is allowed, I/O and memory access is limited, and many CPU settings are locked. Generally, operating systems and drivers run in kernel mode while applications run in user mode.
 
-<div align='center'>
+<p align='center'>
 	<img src='https://doggo.ninja/C9ENjY.png' width='500' />
-</div>
+</p>
 
 An example of how processor modes manifest in a real architecture: on x86-64, the current privilege level (CPL) can be read from a register called `cs` (code segment). Specifically, the CPL is contained in the two least significant bits of the `cs` register. Those two bits can store x86-64's four possible rings: ring 0 is kernel mode and ring 3 is user mode. Rings 1 and 2 are designed for running drivers but are only used by a handful of older niche operating systems. If the CPL bits are `11`, for example, the CPU is running in ring 3: kernel mode.
  
@@ -101,7 +101,7 @@ User space to kernel space control transfers are accomplished using a processor 
 
 1. During the boot process, the operating system stores a table called an *interrupt vector table* (x86-64 calls this the interrupt descriptor table) in RAM and registers it with the CPU. The IVT maps interrupt numbers to handler code pointers.
 
-  <div align='center'><img src='https://doggo.ninja/lmiysV.png' width='250' /></div>
+  <p align='center'><img src='https://doggo.ninja/lmiysV.png' width='250' /></p>
 
 2. Then, userland programs can use an instruction like [INT](https://www.felixcloutier.com/x86/intn:into:int3:int1) which tells the processor to look up the given interrupt number in the IVT, switch to kernel mode, and then jump the instruction pointer to the memory address stored in the IVT.
 
@@ -121,9 +121,9 @@ Programs need to pass data to the operating system when triggering a syscall; th
 
 The variance in how system calls are called across devices means it would be wildly impractical for programmers to implement system calls themselves for every program. This would also mean operating systems couldn't change their interrupt handling for fear of breaking every program that was written to use the old system. Finally, we typically don't write programs in raw assembly anymore... programmers can't be expected to drop down to assembly any time they want to read a file or allocate memory.
 
-<div align='center'>
+<p align='center'>
 	<img src='https://doggo.ninja/eX2rWN.png' width='650' />
-</div>
+</p>
 
 So, operating systems provide an abstraction layer on top of these interrupts. Reusable higher-level library functions that wrap the necessary assembly instructions are provided by libc on Unix-like systems and part of a library called `ntdll.dll` on Windows. Calls to these library functions themselves don't cause switches to kernel mode, they're just standard function calls. Inside the libraries, assembly code does actually transfer control to the kernel, and is a lot more platform-dependent than the wrapping library subroutine.
 
@@ -166,9 +166,9 @@ How do you take control back from program code? After a bit of research, you dis
 Earlier, we talked about how software interrupts are used to hand control from a userland program to the OS. These are called “software” interrupts because they’re voluntarily triggered by a program — machine code executed by the processor in the normal fetch-execute cycle tells it to switch control to the kernel.
 
 
-<div align='center'>
+<p align='center'>
 	<img src='https://doggo.ninja/xG5REv.png' width='500' />
-</div>
+</p>
 
 OS schedulers use *timer chips* like [PITs](https://en.wikipedia.org/wiki/Programmable_interval_timer) to trigger hardware interrupts for multitasking:
 
@@ -189,9 +189,9 @@ A slight improvement to fixed timeslice scheduling is to pick a *target latency*
 
 Process switching is computationally expensive because it requires saving the entire state of the current program and restoring a different one. Past a certain threshold, too small a calculated timeslice can result in worse performance than having a longer fixed timeslice. It's common to have a fixed timeslice that serves as a lower bound when there are many processes. At the time of writing this article, Linux's scheduler uses a target latency of 6&nbsp;ms and a minimum granularity of 0.75&nbsp;ms.
 
-<div align='center'>
+<p align='center'>
 	<img src='https://doggo.ninja/XBMA41.png' width='500' />
-</div>
+</p>
 
 Round-robin scheduling with this basic timeslice calculation is close to what most computers do nowadays. It's still a bit naive; most operating systems tend to have more complex schedulers which take process priorities and deadlines into account. Since 2007, Linux has used a scheduler called "Completely Fair Scheduler." CFS does a bunch of very fancy computer science things to prioritize tasks and divvy up CPU time.
 
@@ -224,9 +224,9 @@ Most of what we learn will generalize very well to other operating systems and a
 
 ### Basic Behavior of Exec Syscalls
 
-<div align='center'>
+<p align='center'>
 	<img src='https://doggo.ninja/2hUW7l.png' width='600' />
-</div>
+</p>
 
 Let's start with a very important system call: `execve`. It loads a program and, if successful, replaces the current process with that program. A couple other syscalls (`execlp`, `execvpe`, etc.) exist, but they all layer on top of `execve` in various fashions.
 
@@ -463,9 +463,9 @@ Computers are so cool!
 ## Part 4: Becoming an Elf-Lord
 
 <p>
-	<div align='center'>
+	<p align='center'>
 		<img src='https://doggo.ninja/2eXsg7.jpg' width='250' />
-	</div>
+	</p>
 </p>
 <div align='center'>
 	<div style='margin-top: -10px;'>
@@ -496,9 +496,9 @@ $ wc -l binfmt_* | sort -nr | sed 1d
 
 Before looking more deeply at how `binfmt_elf` executes ELF files, let's take a look at the file format itself. ELF files are typically made up of four parts.
 
-<div align='center'>
+<p align='center'>
 	<img src='https://doggo.ninja/QKEVvn.png' width='500' />
-</div>
+</p>
 
 #### ELF Header
 
@@ -514,9 +514,9 @@ The ELF header is always at the start of the file. It specifies the locations of
 
 The program header table is a series of entries containing specific details for how to load and execute the binary at runtime. Each entry has a type field that says what detail it's specifying — for example, `PT_LOAD` means it contains data that should be loaded into memory, but `PT_NOTE` means the segment contains informational text that shouldn't necessarily be loaded anywhere.
 
-<div align='center'>
+<p align='center'>
 	<img src='https://doggo.ninja/GfQ2au.png' width='500' />
-</div>
+</p>
 
 Each entry specifies information about where its data is in the file and, sometimes, how to load the data into memory:
 
@@ -529,9 +529,9 @@ Each entry specifies information about where its data is in the file and, someti
 
 The section header table is a series of entries containing information about *sections*. This section information is like a map, charting the data inside the ELF file. It makes it easy for programs like debuggers to understand the intended uses of different portions of the data.
 
-<div align='center'>
+<p align='center'>
 	<img src='https://doggo.ninja/1wWVt9.png' width='450' />
-</div>
+</p>
 
 For example, the program header table can specify a large swath of data to be loaded into memory together. That single `PT_LOAD` block might contain both code and global variables! There's no reason those have to be specified separately to *run* the program; the CPU just starts at the entry point and steps forward, accessing data when and where the program requests it. However, software like a debugger for *analyzing* the program needs to know exactly where each area starts and ends, otherwise it might try to decode some text that says "hello" as code (and since that isn't valid code, explode). This information is stored in the section header table.
 
@@ -605,9 +605,9 @@ So... about memory. It turns out that when the CPU reads from or writes to a mem
  
 The CPU talks to a chip called a *memory management unit* (MMU). The MMU works like a translator, keeping track of a mapping between locations in virtual memory to the location in RAM which functions like a dictionary. When the CPU is given an instruction to read from memory address `0xAD4DA83F`, it asks the MMU to translate that address. The MMU looks it up in the dictionary, discovers that the matching physical address is `0x70B7BD74`, and sends the number back to the CPU. The CPU can then read from that address in RAM.
 
-<div align='center'>
+<p align='center'>
 	<img src='https://doggo.ninja/EOU5pQ.png' width='600' />
-</div>
+</p>
 
 When the computer first boots up, memory accesses go directly to physical RAM. Immediately after startup, the OS creates the translation dictionary and tells the CPU to start using the MMU.
 
@@ -615,9 +615,9 @@ This dictionary is actually called a *page table*, and this system of translatin
 
 The page table itself just resides in physical RAM. While it can contain millions of entries, each entry's size is only on the order of a couple bytes, so the page table doesn't take up too much space.
 
-<div align='center'>
+<p align='center'>
 	<img src='https://doggo.ninja/JAsawH.png' width='600' />
-</div>
+</p>
 
 A great feature of paging is that the page table can be edited while the computer is running. This is what allows each process to have its own isolated memory space. When the OS switches context from one process to another, an important task is remapping the virtual memory space to a different area in physical memory. Let's say you have two processes: process A can have its code and data (likely loaded from an ELF file!) at `0x00200000`, and process B can access its code and data from the very same address. Those two processes can even be the same program, because they aren't actually fighting over that address range! The data for process A is somewhere far from process B in physical memory, and is mapped to `0x00200000` by the kernel when switching to the process.
 

@@ -51,7 +51,7 @@ text = text.replace(
 // 
 // Image attribute order MUST be: src, width
 text = text.replace(
-	/(?:<div +align=['"](?<align>[A-z]+)['"]>\s*)?<img +src=['"](?<src>[\-_.~!*();:@&=+$,/?%#A-z0-9]+?)['"](?: +width=['"](?<width>\d+)['"])? *\/?>(?:\s*<\/div>)?/g,
+	/(?:<p +align=['"](?<align>[A-z]+)['"]>\s*)?<img +src=['"](?<src>[\-_.~!*();:@&=+$,/?%#A-z0-9]+?)['"](?: +width=['"](?<width>\d+)['"])? *\/?>(?:\s*<\/p>)?/g,
 	(...args) => {
 		const groups = args.at(-1)
 
@@ -80,7 +80,7 @@ title: Putting the "You" in CPU
 abstract: Test
 date: '2023-06-22'
 draft: true
-slug: you-in-cpu--delist
+slug: putting-the-you-in-cpu
 tab-size: 8
 ---
 
