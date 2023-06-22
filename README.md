@@ -21,21 +21,21 @@ Let us begin by reviewing how your computer works at its very core.
 
 The *central processing unit* (CPU) of a computer is in charge of all computation. It's the big cheese. The shazam alakablam. It starts chugging as soon as you start your computer, executing instruction after instruction after instruction.
 
-The first mass-produced CPU was the Intel 4004, designed in the late 60s by an Italian physicist and engineer named Federico Faggin. It was a 4-bit architecture instead of the 64-bit systems we use today, and it was much less complex than modern processors, but a lot of its simplicity does still remain.
+The first mass-produced CPU was the [Intel 4004](http://www.intel4004.com/), designed in the late 60s by an Italian physicist and engineer named Federico Faggin. It was a 4-bit architecture instead of the [64-bit](https://en.wikipedia.org/wiki/64-bit_computing) systems we use today, and it was far less complex than modern processors, but a lot of its simplicity does still remain.
 
-The "instructions" that CPUs execute are just binary data: a byte or two to represent what instruction is being run (the opcode), followed by whatever data is needed to run the instruction. What we call *machine code* is nothing but a series of these binary instructions in a row. Assembly is a helpful syntax for reading and writing machine code that's easier for humans to read and write than raw bits; it is always compiled down to the binary that your CPU knows how to read.
+The "instructions" that CPUs execute are just binary data: a byte or two to represent what instruction is being run (the opcode), followed by whatever data is needed to run the instruction. What we call *machine code* is nothing but a series of these binary instructions in a row. [Assembly](https://en.wikipedia.org/wiki/Assembly_language) is a helpful syntax for reading and writing machine code that's easier for humans to read and write than raw bits; it is always compiled down to the binary that your CPU knows how to read.
 
 <img src='https://doggo.ninja/Cv9OdX.png' width='400' />
 
 > An aside: instructions aren't always represented 1:1 in machine code like the above example. For example, `add eax, 512` translates to `05 00 02 00 00`.
 > 
-> The first byte (`05`) is an opcode specifically representing *adding EAX to a 16-bit number*. The remaining bytes are 512 (`0x200`) in [little-endian](https://en.wikipedia.org/wiki/Endianness) byte order.
+> The first byte (`05`) is an opcode specifically representing *adding the EAX register to a 16-bit number*. The remaining bytes are 512 (`0x200`) in [little-endian](https://en.wikipedia.org/wiki/Endianness) byte order.
 >
-> Defuse offers [a helpful tool](https://defuse.ca/online-x86-assembler.htm) for playing around with the translation between assembly and machine code.
+> Defuse Security created [a helpful tool](https://defuse.ca/online-x86-assembler.htm) for playing around with the translation between assembly and machine code.
 
 RAM is your computer's main memory bank, a large multi-purpose space which stores all the data used by programs running on your computer. That includes the program code itself, and the code at the core of the operating system. The CPU always reads machine code directly from RAM, and code can't be run if it isn't loaded into RAM.
 
-The CPU stores an *instruction pointer* which points to the location in RAM that it's going to fetch the next instruction from. After executing each instruction, the CPU moves the pointer and repeats. This is the *fetch-execute cycle*.
+The CPU stores an *instruction pointer* which points to the location in RAM where it's going to fetch the next instruction. After executing each instruction, the CPU moves the pointer and repeats. This is the *fetch-execute cycle*.
 
 <p align='center'>
 	<img src='https://doggo.ninja/23nqBP.png' width='360' />
@@ -43,17 +43,17 @@ The CPU stores an *instruction pointer* which points to the location in RAM that
 
 After executing an instruction, the pointer moves forward to immediately after the instruction in RAM so that it now points to the next instruction. That's why code runs! The instruction pointer just keeps chugging forward, executing machine code in the order in which it's in memory. Some instructions can tell the instruction pointer to jump somewhere else instead, or jump different places depending on a certain condition; this makes reusable code and conditional logic possible.
 
-This instruction pointer is stored in a *register*. Registers are small storage buckets that are extremely fast to read and write from. Each CPU architecture has a fixed set of registers, used for everything from storing temporary values during computations to configuring the processor.
+This instruction pointer is stored in a [*register*](https://en.wikipedia.org/wiki/Processor_register). Registers are small storage buckets that are extremely fast for the CPU to read and write to. Each CPU architecture has a fixed set of registers, used for everything from storing temporary values during computations to configuring the processor.
 
 Some registers are directly accessible from machine code, like `ebx` in the earlier diagram.
 
-Other registers are only used internally by the CPU, but can often be updated or read using specialized instructions. One example is the instruction pointer which can't be read directly but can be updated with, for example, a jump instruction.
+Other registers are only used internally by the CPU, but can often be updated or read using specialized instructions. One example is the instruction pointer, which can't be read directly but can be updated with, for example, a jump instruction.
 
 ### Processors Are Naive
 
-Let's go back to the original question: what happens when you run an executable file on your computer? First, a bunch of magic happens to prepare the execution — we’ll figure all of that out later — but at the end of the process there’s machine code in a file somewhere. The operating system loads this into RAM, and it instructs the CPU to jump the instruction pointer to that position in RAM. The CPU continues running its fetch-execute cycle as usual, so the program begins executing!
+Let's go back to the original question: what happens when you run an executable program on your computer? First, a bunch of magic happens to get ready to run it — we’ll work through all of this later — but at the end of the process there’s machine code in a file somewhere. The operating system loads this into RAM and instructs the CPU to jump the instruction pointer to that position in RAM. The CPU continues running its fetch-execute cycle as usual, so the program begins executing!
 
-(This was one of those psyching-myself-out moments for me — seriously, this is how the program you are using to read this article is running. The CPU is fetching the program's instructions from RAM and running them directly on the CPU in order, and they're rendering this article.)
+(This was one of those psyching-myself-out moments for me — seriously, this is how the program you are using to read this article is running. Your CPU is fetching your browser's instructions from RAM in sequence and directly executing them, and they're rendering this article.)
 
 <img src='https://doggo.ninja/CuKAdU.png' width='400' />
 
@@ -77,7 +77,7 @@ It's time to leap through our first rabbit hole into a land filled with syscalls
 > 
 > The kernel, however, is the core of the operating system. When you boot up your computer, the instruction pointer starts at a program somewhere. That program is the kernel. The kernel has near-full access to your computer's memory, peripherals, and other resources, and is in charge of running software installed on your computer (known as userland programs). We'll learn about how the kernel has this access — and how userland programs don't — over the course of this article.
 >
-> Linux is just a kernel and needs plenty of userland software like shells and display servers to be usable. The kernel in macOS is called XNU and is Unix-like, and the modern Windows kernel is called the NT Kernel.
+> Linux is just a kernel and needs plenty of userland software like shells and display servers to be usable. The kernel in macOS is called [XNU](https://en.wikipedia.org/wiki/XNU) and is Unix-like, and the modern Windows kernel is called the [NT Kernel](https://en.wikipedia.org/wiki/Architecture_of_Windows_NT).
 
 ### Two Rings to Rule Them All
 
@@ -95,11 +95,11 @@ An example of how processor modes manifest in a real architecture: on x86-64, th
 
 Programs run in user mode because they can't be trusted with full access to the computer. User mode does its job and prevents access to most of the computer. But programs *somehow* need to be able to access I/O, allocate memory, and interact with the operating system! To do so, software running in user mode has to ask the operating system kernel for help. The OS can then implement its own security protections to prevent programs from doing anything malicious.
 
-If you've ever written code that interacts with the OS, you'll probably recognize functions like `open`, `read`, `fork`, and `exit`. At the lowest level, these are all *system calls*; the way programs can ask the OS for help. A system call is a special procedure that lets a program start a transition from user space to kernel space, jumping from the program's code into OS code.
+If you've ever written code that interacts with the OS, you'll probably recognize functions like `open`, `read`, `fork`, and `exit`. Below a couple of layers of abstraction, these all use *system calls* to ask the OS for help. A system call is a special procedure that lets a program start a transition from user space to kernel space, jumping from the program's code into OS code.
 
-User space to kernel space control transfers are accomplished using a processor feature called *software interrupts*:
+User space to kernel space control transfers are accomplished using a processor feature called [*software interrupts*](https://en.wikipedia.org/wiki/Interrupt#Software_interrupts):
 
-1. During the boot process, the operating system stores a table called an *interrupt vector table* (x86-64 calls this the interrupt descriptor table) in RAM and registers it with the CPU. The IVT maps interrupt numbers to handler code pointers.
+1. During the boot process, the operating system stores a table called an [*interrupt vector table*](https://en.wikipedia.org/wiki/Interrupt_vector_table) (IVT; x86-64 calls this the [interrupt descriptor table](https://en.wikipedia.org/wiki/Interrupt_descriptor_table)) in RAM and registers it with the CPU. The IVT maps interrupt numbers to handler code pointers.
 
   <p align='center'><img src='https://doggo.ninja/lmiysV.png' width='250' /></p>
 
@@ -107,7 +107,7 @@ User space to kernel space control transfers are accomplished using a processor 
 
 When this kernel code finishes, it tells the CPU to switch back to user mode and return the instruction pointer to where it was when the interrupt was triggered. This is accomplished using an instruction like [IRET](https://www.felixcloutier.com/x86/iret:iretd:iretq).
 
-(If you were curious, the standard interrupt id for syscalls is `0x80` on Linux.)
+(If you were curious, the interrupt id used for system calls on Linux is `0x80`. You can read a list of Linux's system calls on [Michael Kerrisk's online manpage directory](https://man7.org/linux/man-pages/man2/syscalls.2.html).)
 
 #### Wrapper APIs: Abstracting Away Interrupts
 
@@ -125,7 +125,7 @@ The variance in how system calls are called across devices means it would be wil
 	<img src='https://doggo.ninja/eX2rWN.png' width='650' />
 </p>
 
-So, operating systems provide an abstraction layer on top of these interrupts. Reusable higher-level library functions that wrap the necessary assembly instructions are provided by libc on Unix-like systems and part of a library called `ntdll.dll` on Windows. Calls to these library functions themselves don't cause switches to kernel mode, they're just standard function calls. Inside the libraries, assembly code does actually transfer control to the kernel, and is a lot more platform-dependent than the wrapping library subroutine.
+So, operating systems provide an abstraction layer on top of these interrupts. Reusable higher-level library functions that wrap the necessary assembly instructions are provided by [libc](https://www.gnu.org/software/libc/) on Unix-like systems and part of a library called [`ntdll.dll`](https://learn.microsoft.com/en-us/windows-hardware/drivers/kernel/libraries-and-headers) on Windows. Calls to these library functions themselves don't cause switches to kernel mode, they're just standard function calls. Inside the libraries, assembly code does actually transfer control to the kernel, and is a lot more platform-dependent than the wrapping library subroutine.
 
 When you call `exit(1)` from C running on a Unix-like system, that function is internally running machine code to trigger an interrupt, after placing the system call's opcode and arguments in the right registers/stack/whatever. Computers are so cool!
 
@@ -177,13 +177,17 @@ OS schedulers use *timer chips* like [PITs](https://en.wikipedia.org/wiki/Progra
 3. When the timer elapses, it triggers a hardware interrupt to switch to kernel mode and jump to OS code.
 4. The OS can now save where the program left off, load a different program, and repeat the process.
 
-This is called *preemptive multitasking*; the interruption of a process is called *preemption*. If you’re, say, reading this article on a browser and also listening to music, your very own computer is probably following this cycle.
+This is called *preemptive multitasking*; the interruption of a process is called [*preemption*](https://en.wikipedia.org/wiki/Preemption_(computing)). If you’re, say, reading this article on a browser and also listening to music, your very own computer is probably following this cycle.
 
 ### Timeslice Calculation
 
 A *timeslice* is the duration an OS scheduler allows a process to run before preempting it. The simplest way to pick timeslices is to give every process the same timeslice, perhaps in the 10&nbsp;ms range, and cycle through tasks in order. This is called *fixed timeslice round-robin* scheduling.
 
-> Timeslices are sometimes also called "quantums." I think I deserve praise for not incessantly calling them that. In other jargon, Linux kernel devs use the time unit "jiffies" to count timer ticks at a fixed frequency. The jiffy frequency is typically 1000 Hz but can be configured at compile time.
+> **Aside: fun jargon facts!**
+> 
+> Did you know that timeslices are often called "quantums?" Now you do, and you can impress all your tech friends. I think I deserve heaps of praise for not saying quantum in every other sentence in this article.
+> 
+> Speaking of timeslice jargon, Linux kernel devs use the [jiffy](https://github.com/torvalds/linux/blob/22b8cc3e78f5448b4c5df00303817a9137cd663f/include/linux/jiffies.h) time unit to count fixed frequency timer ticks. Among other things, jiffies are used for measuring the lengths of timeslices. Linux's jiffy frequency is typically 1000 Hz but can be configured at compile time.
 
 A slight improvement to fixed timeslice scheduling is to pick a *target latency* — the ideal longest time for a process to respond. The target latency should be equal to the time it takes for a process to resume execution after being preempted. Timeslices are calculated by dividing the target latency by the total number of tasks; this is better than fixed timeslice scheduling because it eliminates wasteful task switching with fewer processes. With a target latency of 15&nbsp;ms and 10 processes, each process would get 15/10 or 1.5&nbsp;ms to run. With only 3 processes, each process gets a longer 5&nbsp;ms timeslice while still hitting the target latency.
 
@@ -193,15 +197,15 @@ Process switching is computationally expensive because it requires saving the en
 	<img src='https://doggo.ninja/XBMA41.png' width='500' />
 </p>
 
-Round-robin scheduling with this basic timeslice calculation is close to what most computers do nowadays. It's still a bit naive; most operating systems tend to have more complex schedulers which take process priorities and deadlines into account. Since 2007, Linux has used a scheduler called "Completely Fair Scheduler." CFS does a bunch of very fancy computer science things to prioritize tasks and divvy up CPU time.
+Round-robin scheduling with this basic timeslice calculation is close to what most computers do nowadays. It's still a bit naive; most operating systems tend to have more complex schedulers which take process priorities and deadlines into account. Since 2007, Linux has used a scheduler called [Completely Fair Scheduler](https://docs.kernel.org/scheduler/sched-design-CFS.html). CFS does a bunch of very fancy computer science things to prioritize tasks and divvy up CPU time.
 
-Every time the OS preempts a process it needs to load the new program's saved execution context, including its memory environment. This is accomplished by telling the CPU to use a different *page table*, the mapping from "virtual" to physical addresses. This is also the system that prevents programs from accessing each other's memory; we'll figure it out in-depth in part 5 of this article.
+Every time the OS preempts a process it needs to load the new program's saved execution context, including its memory environment. This is accomplished by telling the CPU to use a different *page table*, the mapping from "virtual" to physical addresses. This is also the system that prevents programs from accessing each other's memory; we'll go down this rabbit hole in parts 5 and 6 of this article.
 
 ### Note #1: Kernel Preemptability
 
 So far, we've been only talking about the preemption and scheduling of userland processes. Kernel code might make programs feel laggy if it took too long handling a syscall or executing driver code.
 
-Modern kernels, including the Linux kernel, are preemptive. This means they're programmed in a way that allows kernel code itself to be interrupted and scheduled just like userland processes.
+Modern kernels, including Linux, are [preemptive kernels](https://en.wikipedia.org/wiki/Kernel_preemption). This means they're programmed in a way that allows kernel code itself to be interrupted and scheduled just like userland processes.
 
 This isn't very important to know about unless you're writing a kernel or something, but basically every article I've read has mentioned it so I thought I would too! Extra knowledge is rarely a bad thing.
 
@@ -209,7 +213,7 @@ This isn't very important to know about unless you're writing a kernel or someth
 
 Ancient operating systems, including classic Mac OS and versions of Windows long before NT, used a predecessor to preemptive multitasking. Rather than the OS deciding when to preempt programs, the programs themselves would choose to yield to the OS. They would trigger a software interrupt to say, "hey, you can let another program run now." These explicit yields were the only way for the OS to regain control and switch to the next scheduled process.
 
-This is called *cooperative multitasking*. It has a couple major flaws: malicious or just poorly designed programs can easily freeze the entire operating system, and it's nigh impossible to ensure temporal consistency for realtime/time-sensitive tasks. For these reasons, the tech world switched to preemptive multitasking a long time ago and never looked back.
+This is called [*cooperative multitasking*](https://en.wikipedia.org/wiki/Cooperative_multitasking). It has a couple major flaws: malicious or just poorly designed programs can easily freeze the entire operating system, and it's nigh impossible to ensure temporal consistency for realtime/time-sensitive tasks. For these reasons, the tech world switched to preemptive multitasking a long time ago and never looked back.
 
 ## Part 3: The Double-Click
 
@@ -316,7 +320,7 @@ In `execve`, a special value is used for the file descriptor argument, `AT_FDCWD
 
 #### Step 1: Setup
 
-We've now reached `do_execveat_common`, the core function for executing programs. We're going to take a small step back from staring at code so we can get a more general idea of what's going on.
+We've now reached `do_execveat_common`, the core function handling program execution. We're going to take a small step back from staring at code to get a more general idea of what's going on.
 
 The first major job of `do_execveat_common` is setting up a struct called `linux_binprm`. I won't include a copy of [the whole struct definition](https://github.com/torvalds/linux/blob/22b8cc3e78f5448b4c5df00303817a9137cd663f/include/linux/binfmts.h#L15-L65), but there are a couple of important fields to go over:
 
@@ -344,13 +348,15 @@ As we can see, its length is defined as the constant `BINPRM_BUF_SIZE`. By searc
 #define BINPRM_BUF_SIZE 256
 ```
 
-> What's the `uapi` in this path? Why isn't the length defined in the same file as the `linux_binprm` struct, `include/linux/binfmts.h`?
+So, the kernel loads the opening 256 bytes of the executed file into this memory buffer.
+
+> **Aside: what's a UAPI?**
+> 
+> You might notice that the above code's path contains `/uapi/`. Why isn't the length defined in the same file as the `linux_binprm` struct, `include/linux/binfmts.h`?
 >
-> UAPI stands for "userspace API In this case, it means someone decided that the length of the buffer should be part of the kernel's public API. In theory, everything UAPI is exposed to userland, and everything non-UAPI is private to kernel code.
+> UAPI stands for "userspace API." In this case, it means someone decided that the length of the buffer should be part of the kernel's public API. In theory, everything UAPI is exposed to userland, and everything non-UAPI is private to kernel code.
 >
 > Kernel and user space code originally coexisted in one jumbled mass. In 2012, UAPI code was [refactored into a separate directory](https://lwn.net/Articles/507794/) as an attempt to improve maintainability.
-
-So, the kernel loads the opening 256 bytes of the executed file into this memory buffer.
 
 #### Step 2: Binfmts
 
@@ -403,7 +409,7 @@ Since shebangs are handled by the kernel, and pull from `buf` instead of loading
 
 Imagine having a bug because of this. Imagine trying to figure out the root cause of what's breaking your code. Imagine how it would feel, discovering that the problem is deep within the Linux kernel. Woe to the next IT person at a massive enterprise who discovers that part of a path has mysteriously gone missing.
 
-**The second wonky thing:** remember how it's only *convention* for `argv[0]` to be the program name? How the caller can really pass any `argv` they want to an exec syscall and it'll pass through unmoderated?
+**The second wonky thing:** remember how it's only *convention* for `argv[0]` to be the program name, how the caller can pass any `argv` they want to an exec syscall and it will pass through unmoderated?
 
 It just so happens that `binfmt_script` is one of those places that *assumes* `argv[0]` is the program name. It always removes `argv[0]`, and then adds the following to the start of `argv`:
 
@@ -417,7 +423,7 @@ After updating `argv`, the handler finishes preparing the file for execution by 
 
 #### Format Highlight: Miscellaneous Interpreters
 
-Another interesting handler is `binfmt_misc`. It opens up the ability to add some limited formats through userland configuration, by mounting a special file system at `/proc/sys/fs/binfmt_misc/`. Programs can perform specially formatted writes to files in this directory to add their own handlers. Each configuration entry specifies:
+Another interesting handler is `binfmt_misc`. It opens up the ability to add some limited formats through userland configuration, by mounting a special file system at `/proc/sys/fs/binfmt_misc/`. Programs can perform [specially formatted](https://www.kernel.org/doc/html/v4.18/admin-guide/binfmt-misc.html) writes to files in this directory to add their own handlers. Each configuration entry specifies:
 
 - How to detect their file format. This can either specify either a magic number at a certain offset or a file extension to look for.
 - The path to an interpreter executable. There's no way to specify interpreter arguments, so a wrapper script is needed if those are desired.
@@ -427,7 +433,7 @@ This `binfmt_misc` system is often used by Java installations, configured to det
 
 This is a pretty cool way to let program installers add support for their own formats without needing to write highly privileged kernel code.
 
-### In The End
+### In the End (Not the Linkin Park Song)
 
 An exec syscall will always end up in one of two paths:
 
@@ -452,7 +458,7 @@ Well, it turns out that this behavior isn't part of the kernel. It's actually a 
 
 When you execute a file using a shell and the exec syscall fails, most shells will *retry executing the file as a shell script* by executing a shell with the filename as the first argument. Bash will typically use itself as this interpreter, while ZSH uses whatever `sh` is, usually [Bourne shell](https://en.wikipedia.org/wiki/Bourne_shell).
 
-This behavior is so common because it's specified in *POSIX*, an old standard designed to make code portable between Unix systems. While POSIX isn't strictly followed by most tools or operating systems, many of its conventions are still shared.
+This behavior is so common because it's specified in [*POSIX*](https://en.wikipedia.org/wiki/POSIX), an old standard designed to make code portable between Unix systems. While POSIX isn't strictly followed by most tools or operating systems, many of its conventions are still shared.
 
 > If \[an exec syscall\] fails due to an error equivalent to the `[ENOEXEC]` error, **the shell shall execute a command equivalent to having a shell invoked with the command name as its first operand**, with any remaining arguments passed to the new shell. If the executable file is not a text file, the shell may bypass this command execution. In this case, it shall write an error message and shall return an exit status of 126.
 > 
@@ -462,9 +468,11 @@ Computers are so cool!
 
 ## Part 4: Becoming an Elf-Lord
 
+We pretty thoroughly understand `execve` now. At the end of most paths, the kernel will reach a final program containing machine code for it to launch. Typically, a setup process is required before actually jumping to the code — for example, different parts of the program have to be loaded into the right places in memory. Each program needs different amounts of memory for different things, so we have standard file formats that specify how to set up a program for execution. While Linux supports many such formats, the most common format by far is *ELF* (executable and linkable format).
+
 <p>
 	<p align='center'>
-		<img src='https://doggo.ninja/2eXsg7.jpg' width='250' />
+		<img src='https://doggo.ninja/2eXsg7.jpg' width='260' />
 	</p>
 </p>
 <div align='center'>
@@ -473,13 +481,13 @@ Computers are so cool!
 	</p>
 </div>
 
-We pretty thoroughly understand `execve` now. At the end of most paths, the kernel will reach a final program containing machine code for it to launch. Typically, a setup process is required before actually jumping to the code — for example, different parts of the program have to be loaded into the right places in memory. Each program needs different amounts of memory for different things, so we have standard file formats that specify how to set up a program for execution. While Linux supports many such formats, the most common format by far is *ELF* (executable and linkable format).
-
-> When you run an app or command-line program on Linux, it's exceedingly likely that it's an ELF binary. On macOS, the de-facto format is [Mach-O](https://en.wikipedia.org/wiki/Mach-O) instead, which does all the same things as ELF but slightly differently. On Windows, `.exe` files use the [Portable Executable](https://en.wikipedia.org/wiki/Portable_Executable) format which is, again, basically the same thing.
+> **Aside: are elves everywhere?**
+> 
+> When you run an app or command-line program on Linux, it's exceedingly likely that it's an ELF binary. However, on macOS the de-facto format is  [Mach-O](https://en.wikipedia.org/wiki/Mach-O) instead. Mach-O does all the same things as ELF but is structured differently. On Windows, .exe files use the [Portable Executable](https://en.wikipedia.org/wiki/Portable_Executable) format which is, again, a different format with the same concept.
 
 In the Linux kernel, ELF binaries are handled by the `binfmt_elf` handler, which is more complex than many other handlers and contains thousands of lines of code. It's responsible for parsing out certain details from the ELF file and using them to load the process into memory and execute it.
 
-*I ran some command-line kung fu to sort binfmts by line count:*
+*I ran some command-line kung fu to sort binfmt handlers by line count:*
 
 <!-- name: Shell session -->
 ```
@@ -494,7 +502,7 @@ $ wc -l binfmt_* | sort -nr | sed 1d
 
 ### File Structure
 
-Before looking more deeply at how `binfmt_elf` executes ELF files, let's take a look at the file format itself. ELF files are typically made up of four parts.
+Before looking more deeply at how `binfmt_elf` executes ELF files, let's take a look at the file format itself. ELF files are typically made up of four parts:
 
 <p align='center'>
 	<img src='https://doggo.ninja/QKEVvn.png' width='500' />
@@ -502,17 +510,17 @@ Before looking more deeply at how `binfmt_elf` executes ELF files, let's take a 
 
 #### ELF Header
 
-Every ELF file has an ELF header, and it has the very important job of conveying basic information about the binary such as:
+Every ELF file has an [ELF header](https://refspecs.linuxfoundation.org/elf/gabi4+/ch4.eheader.html). It has the very important job of conveying basic information about the binary such as:
 
 - What processor it's designed to run on. ELF files can contain machine code for different processor types, like ARM and x86.
-- Whether the binary is meant to be run on its own as an executable, or whether it's meant to be loaded by other programs as a "dynamically linked library." We'll go into details about dynamic linking later. [perhaps hide this part?]
+- Whether the binary is meant to be run on its own as an executable, or whether it's meant to be loaded by other programs as a "dynamically linked library." We'll go into details about what dynamic linking is soon.
 - The entry point of the executable. Later sections specify exactly where to load data contained in the ELF file into memory. The entry point is a memory address pointing to where the first machine code instruction is in memory after the entire process has been loaded.
 
 The ELF header is always at the start of the file. It specifies the locations of the program header table and section header, which can be anywhere within the file. Those tables, in turn, point to data stored elsewhere in the file.
 
 #### Program Header Table
 
-The program header table is a series of entries containing specific details for how to load and execute the binary at runtime. Each entry has a type field that says what detail it's specifying — for example, `PT_LOAD` means it contains data that should be loaded into memory, but `PT_NOTE` means the segment contains informational text that shouldn't necessarily be loaded anywhere.
+The [program header table](https://refspecs.linuxbase.org/elf/gabi4+/ch5.pheader.html) is a series of entries containing specific details for how to load and execute the binary at runtime. Each entry has a type field that says what detail it's specifying — for example, `PT_LOAD` means it contains data that should be loaded into memory, but `PT_NOTE` means the segment contains informational text that shouldn't necessarily be loaded anywhere.
 
 <p align='center'>
 	<img src='https://doggo.ninja/GfQ2au.png' width='500' />
@@ -527,7 +535,7 @@ Each entry specifies information about where its data is in the file and, someti
 
 #### Section Header Table
 
-The section header table is a series of entries containing information about *sections*. This section information is like a map, charting the data inside the ELF file. It makes it easy for programs like debuggers to understand the intended uses of different portions of the data.
+The [section header table](https://refspecs.linuxbase.org/elf/gabi4+/ch4.sheader.html) is a series of entries containing information about *sections*. This section information is like a map, charting the data inside the ELF file. It makes it easy for [programs like debuggers](https://www.sourceware.org/gdb/) to understand the intended uses of different portions of the data.
 
 <p align='center'>
 	<img src='https://doggo.ninja/1wWVt9.png' width='450' />
@@ -535,7 +543,7 @@ The section header table is a series of entries containing information about *se
 
 For example, the program header table can specify a large swath of data to be loaded into memory together. That single `PT_LOAD` block might contain both code and global variables! There's no reason those have to be specified separately to *run* the program; the CPU just starts at the entry point and steps forward, accessing data when and where the program requests it. However, software like a debugger for *analyzing* the program needs to know exactly where each area starts and ends, otherwise it might try to decode some text that says "hello" as code (and since that isn't valid code, explode). This information is stored in the section header table.
 
-While it's usually included, the section header table is actually optional. ELF files can run perfectly well with the section header table completely removed, and developers who want to hide what their code does will sometimes intentionally "strip" the section header table from their ELF binaries to make them harder to decode.
+While it's usually included, the section header table is actually optional. ELF files can run perfectly well with the section header table completely removed, and developers who want to hide what their code does will sometimes intentionally strip or mangle the section header table from their ELF binaries to [make them harder to decode](https://binaryresearch.github.io/2019/09/17/Analyzing-ELF-Binaries-with-Malformed-Headers-Part-1-Emulating-Tiny-Programs.html).
 
 Each section has a name, a type, and some flags that specify how it's intended to be used and decoded. Standard names usually start with a dot by convention. The most common sections are:
 
@@ -569,9 +577,9 @@ If a statically linked program needs a function `foo` from a library called `bar
 
 ### Dynamic Linking in the Wild
 
-On Linux, dynamically linkable libraries like `bar` are typically packaged into files with the .so (Shared Object) extension. These .so files are ELF files just like programs — you may recall that the ELF header includes a field to specify whether the file is an executable or a library. A `.dynsym` section in the section header table contains information on the symbols that are exported from the file and can be dynamically linked to.
+On Linux, dynamically linkable libraries like `bar` are typically packaged into files with the .so (Shared Object) extension. These .so files are ELF files just like programs — you may recall that the ELF header includes a field to specify whether the file is an executable or a library. In addition, shared objects have a `.dynsym` section in the section header table which contains information on what symbols are exported from the file and can be dynamically linked to.
 
-On Windows, libraries like `bar` are packaged into .dll (Dynamic Link Library) files. macOS uses the .dylib (DYnamically linked LIBrary) extension. These are formatted slightly differently from ELF files, but it's all the same concept.
+On Windows, libraries like `bar` are packaged into .dll (**d**ynamic **l**ink **l**ibrary) files. macOS uses the .dylib (**dy**namically linked **lib**rary) extension. Just like macOS apps and Windows .exe files, these are formatted slightly differently from ELF files but are the same concept and technique.
 
 An interesting distinction between the two types of linking is that with static linking, only the portions of the library that are used are included in the executable and thus loaded into memory. With dynamic linking, the *entire library* is loaded into memory. This might initially sound less efficient, but it actually allows modern operating systems to save *more* space by loading a library into memory once and then sharing that code between processes. Only code can be shared as the library needs different state for different programs, but the savings can still be on the order of tens to hundreds of megabytes of RAM.
 
@@ -581,7 +589,7 @@ Let's hop on back to the kernel running ELF files: if the binary it's executing 
 
 To run the binary, the OS needs to figure out what libraries are needed, load them, replace all the named pointers with actual jump instructions, and *then* start the actual program code. This is very complex code that interacts deeply with the ELF format, so it's usually a standalone program rather than part of the kernel. ELF files specify the path to the program they want to use (typically something like `/lib64/ld-linux-x86-64.so.2`) in a `PT_INTERP` entry in the program header table.
 
-After reading the ELF header and scanning through the program header table, the kernel can set up the memory structure for the new program. It starts by loading all `PT_LOAD` segments into memory, populating the program's static data, BSS space, and machine code. If the program is dynamically linked, the kernel will have to execute the ELF interpreter (`PT_INTERP`), so it also loads the interpreter's data, BSS, and code into memory.
+After reading the ELF header and scanning through the program header table, the kernel can set up the memory structure for the new program. It starts by loading all `PT_LOAD` segments into memory, populating the program's static data, BSS space, and machine code. If the program is dynamically linked, the kernel will have to execute the [ELF interpreter](https://unix.stackexchange.com/questions/400621/what-is-lib64-ld-linux-x86-64-so-2-and-why-can-it-be-used-to-execute-file) (`PT_INTERP`), so it also loads the interpreter's data, BSS, and code into memory.
 
 Now the kernel needs to set the instruction pointer for the CPU to restore when returning to userland. If the executable is dynamically linked, the kernel sets the instruction pointer to the start of the ELF interpreter's code in memory. Otherwise, the kernel sets it to the start of the executable.
 
@@ -593,7 +601,7 @@ Finally, the syscall is over and the kernel returns to userland. It restores the
 
 ## Part 5: The Translator in Your Computer
 
-Up until now, every time I've talked about reading and writing memory has been pretty wishy-washy. ELF files specify specific memory addresses to load data into, why aren't there problems with different processes trying to use conflicting memory? Why does each process seem to have a different memory environment?
+Up until now, every time I've talked about reading and writing memory has been pretty wishy-washy. ELF files specify specific memory addresses to load data into, so why aren't there problems with different processes trying to use conflicting memory? Why does each process seem to have a different memory environment?
 
 Also, how exactly did we get here? We understand that `execve` is a syscall that *replaces* the current process with a new program, but this doesn't explain how multiple processes can be started. It definitely doesn't explain how the very first program runs — what chicken (process) lays (spawns) all the other eggs (other processes)?
 
@@ -603,7 +611,7 @@ We're nearing the end of our journey. After these two questions are answered, we
 
 So... about memory. It turns out that when the CPU reads from or writes to a memory address, it's not actually referring to that location in *physical* memory (RAM). Rather, it's pointing to a location in *virtual* memory space.
  
-The CPU talks to a chip called a *memory management unit* (MMU). The MMU works like a translator, keeping track of a mapping between locations in virtual memory to the location in RAM which functions like a dictionary. When the CPU is given an instruction to read from memory address `0xAD4DA83F`, it asks the MMU to translate that address. The MMU looks it up in the dictionary, discovers that the matching physical address is `0x70B7BD74`, and sends the number back to the CPU. The CPU can then read from that address in RAM.
+The CPU talks to a chip called a [*memory management unit*](https://en.wikipedia.org/wiki/Memory_management_unit) (MMU). The MMU works like a translator, keeping track of a mapping between locations in virtual memory to the location in RAM which functions like a dictionary. When the CPU is given an instruction to read from memory address `0xAD4DA83F`, it asks the MMU to translate that address. The MMU looks it up in the dictionary, discovers that the matching physical address is `0x70B7BD74`, and sends the number back to the CPU. The CPU can then read from that address in RAM.
 
 <p align='center'>
 	<img src='https://doggo.ninja/EOU5pQ.png' width='600' />
@@ -619,7 +627,7 @@ The page table itself just resides in physical RAM. While it can contain million
 	<img src='https://doggo.ninja/2qY74r.png' width='600' />
 </p>
 
-A great feature of paging is that the page table can be edited while the computer is running. This is what allows each process to have its own isolated memory space. When the OS switches context from one process to another, an important task is remapping the virtual memory space to a different area in physical memory. Let's say you have two processes: process A can have its code and data (likely loaded from an ELF file!) at `0x00200000`, and process B can access its code and data from the very same address. Those two processes can even be the same program, because they aren't actually fighting over that address range! The data for process A is somewhere far from process B in physical memory, and is mapped to `0x00200000` by the kernel when switching to the process.
+The magic of the paging system is that the page table can be edited while the computer is running. This is how each process can have its own isolated memory space— when the OS switches context from one process to another, an important task is remapping the virtual memory space to a different area in physical memory. Let's say you have two processes: process A can have its code and data (likely loaded from an ELF file!) at `0x00200000`, and process B can access its code and data from the very same address. Those two processes can even be the same program, because they aren't actually fighting over that address range! The data for process A is somewhere far from process B in physical memory, and is mapped to `0x00200000` by the kernel when switching to the process.
 
 [diagram: two processes accessing different parts of memory]
 
@@ -659,7 +667,7 @@ x86-64 traditionally uses 4-level hierarchical paging. However, the designers al
 
 [diagram of 4 level hierarchical paging]
 
-Many recent Intel processors implement [5-level paging](https://www.intel.com/content/www/us/en/content-details/671442/5-level-paging-and-5-level-ept-white-paper.html), adding another level of paging indirection as well as 9 more bits to expand the address space to 128 PiB. 5-level paging is supported by operating systems including Linux [since 2017](https://lwn.net/Articles/717293/) and recent Windows 10 and 11 server versions.
+Many recent Intel processors implement [5-level paging](https://www.intel.com/content/www/us/en/content-details/671442/5-level-paging-and-5-level-ept-white-paper.html), adding another level of paging indirection as well as 9 more bits to expand the address space to 128 PiB. 5-level paging is supported by operating systems including Linux [since 2017](https://lwn.net/Articles/717293/), as well as recent Windows 10 and 11 server versions.
 
 At any level of the tree, the pointer to the next entry can be null (`0x0`) to indicate that there  
 
