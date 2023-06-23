@@ -328,7 +328,7 @@ The first major job of `do_execveat_common` is setting up a struct called `linux
 
 - Data structures like `mm_struct` and `vm_area_struct` are defined to prepare virtual memory management for the new program.
 - `argc` and `envc` are calculated and stored to be passed to the program.
-- `filename` and `interp` store the filename of the program and its interpreter, respectively. These start out with the same value, but can change. One case where the binary being *executed* is different from the program name is when running interpreted programs like Python scripts with a [shebang](https://en.wikipedia.org/wiki/Shebang_(Unix)).
+- `filename` and `interp` store the filename of the program and its interpreter, respectively. These start out equal to each other, but can change in some cases: one situation in which the binary being *executed* is different from the program name is when running interpreted programs like Python scripts with a [shebang](https://en.wikipedia.org/wiki/Shebang_(Unix)). In this example, `filename` points to the Python file but the `interp` is the Python interpreter's path.
 - `buf` is an array filled with the first 256 bytes of the file to be executed. It's used to detect the format of the file and load script shebangs.
 
 (TIL: binprm stands for **bin**ary **pr**og**r**a**m**.)
@@ -425,7 +425,7 @@ After updating `argv`, the handler finishes preparing the file for execution by 
 
 #### Format Highlight: Miscellaneous Interpreters
 
-Another interesting handler is `binfmt_misc`. It opens up the ability to add some limited formats through userland configuration, by mounting a special file system at `/proc/sys/fs/binfmt_misc/`. Programs can perform [specially formatted](https://www.kernel.org/doc/html/v4.18/admin-guide/binfmt-misc.html) writes to files in this directory to add their own handlers. Each configuration entry specifies:
+Another interesting handler is `binfmt_misc`. It opens up the ability to add some limited formats through userland configuration, by mounting a special file system at `/proc/sys/fs/binfmt_misc/`. Programs can perform [specially formatted](https://docs.kernel.org/admin-guide/binfmt-misc.html) writes to files in this directory to add their own handlers. Each configuration entry specifies:
 
 - How to detect their file format. This can either specify either a magic number at a certain offset or a file extension to look for.
 - The path to an interpreter executable. There's no way to specify interpreter arguments, so a wrapper script is needed if those are desired.
