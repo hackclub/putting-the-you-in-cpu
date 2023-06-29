@@ -11,6 +11,8 @@ I finally cracked and decided to go all-in on figuring out as much as possible. 
 
 And you know what they say... you only truly understand something if you can explain it to someone else.
 
+> Feel like you know this stuff already? Read part 3 and I *guarantee* you will learn at least one new interesting technical detail. Unless you're like, Linus Torvalds, or a kernel developer who's worked heavily on exec syscalls.
+
 ## Part 1: The "Basics"
 
 The one thing that surprised me over and over again while writing this article was how *simple* computers are. It's still hard for me not to psych myself out, expecting more complexity or abstraction than actually exists! If there's one thing you should burn into your brain before continuing, it's that everything that seems simple actually is that simple. This simplicity is very beautiful and sometimes very, very cursed.
@@ -91,7 +93,7 @@ Processors start in kernel mode. Before executing a program, the kernel initiate
 	<img src='https://doggo.ninja/C9ENjY.png' width='500' />
 </p>
 
-An example of how processor modes manifest in a real architecture: on x86-64, the current privilege level (CPL) can be read from a register called `cs` (code segment). Specifically, the CPL is contained in the two least significant bits of the `cs` register. Those two bits can store x86-64's four possible rings: ring 0 is kernel mode and ring 3 is user mode. Rings 1 and 2 are designed for running drivers but are only used by a handful of older niche operating systems. If the CPL bits are `11`, for example, the CPU is running in ring 3: kernel mode.
+An example of how processor modes manifest in a real architecture: on x86-64, the current privilege level (CPL) can be read from a register called `cs` (code segment). Specifically, the CPL is contained in the two [least significant bits](https://en.wikipedia.org/wiki/Bit_numbering) of the `cs` register. Those two bits can store x86-64's four possible rings: ring 0 is kernel mode and ring 3 is user mode. Rings 1 and 2 are designed for running drivers but are only used by a handful of older niche operating systems. If the CPL bits are `11`, for example, the CPU is running in ring 3: kernel mode.
  
 ### What Even is a Syscall?
 
@@ -139,7 +141,7 @@ Intel and AMD managed not to coordinate very well on x86-64; it actually has *tw
 
 (AMD and Intel processors have slightly different compatibility with these instructions. `SYSCALL` is generally the best option for 64-bit programs, while `SYSENTER` has better support with 32-bit programs.)
 
-As is typical, [RISC](https://en.wikipedia.org/wiki/Reduced_instruction_set_computer) architectures tend not to have such special instructions. AArch64, the RISC architecture Apple Silicon is based on, uses only [one interrupt instruction](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/SVC--Supervisor-Call-) for syscalls and software interrupts alike. I think Mac users are doing fine&nbsp;:)
+Representative of the style, [RISC](https://en.wikipedia.org/wiki/Reduced_instruction_set_computer) architectures tend not to have such special instructions. AArch64, the RISC architecture Apple Silicon is based on, uses only [one interrupt instruction](https://developer.arm.com/documentation/ddi0596/2021-12/Base-Instructions/SVC--Supervisor-Call-) for syscalls and software interrupts alike. I think Mac users are doing fine&nbsp;:)
 
 ---
 
@@ -179,7 +181,7 @@ OS schedulers use *timer chips* like [PITs](https://en.wikipedia.org/wiki/Progra
 3. When the timer elapses, it triggers a hardware interrupt to switch to kernel mode and jump to OS code.
 4. The OS can now save where the program left off, load a different program, and repeat the process.
 
-This is called *preemptive multitasking*; the interruption of a process is called [*preemption*](https://en.wikipedia.org/wiki/Preemption_(computing)). If you’re, say, reading this article on a browser and also listening to music, your very own computer is probably following this cycle.
+This is called *preemptive multitasking*; the interruption of a process is called [*preemption*](https://en.wikipedia.org/wiki/Preemption_(computing)). If you’re, say, reading this article on a browser and also listening to music, your very own computer is probably following this exact cycle thousands of times a second.
 
 ### Timeslice Calculation
 
@@ -237,6 +239,8 @@ Most of what we learn will generalize very well to other operating systems and a
 Let's start with a very important system call: `execve`. It loads a program and, if successful, replaces the current process with that program. A couple other syscalls (`execlp`, `execvpe`, etc.) exist, but they all layer on top of `execve` in various fashions.
 
 > `execve` is *actually* built on top of `execveat`, a more general syscall that runs a program with some configuration options. For simplicity, we'll mostly talk about `execve`; the only difference is that it provides some defaults to `execveat`.
+>
+> What does the `ve` stand for? The `v` means one parameter is the vector (list) of arguments (`argv`), and the `e` means another parameter is the vector of environment variables (`envp`). Various other exec syscalls have different suffices to designate different call signatures. The `at` in `execveat` is just "at", because it specifies the location to run `execve` at.
 
 The call signature of `execve` is:
 
@@ -575,7 +579,7 @@ However, some libraries are super common. You'll find libc is used by basically 
 
 If a statically linked program needs a function `foo` from a library called `bar`, the program would include a copy of the entirety of `foo`. However, if it's dynamically linked it would only include a reference saying "I need `foo` from library `bar`." When the program is run, `bar` is hopefully installed on the computer and the `foo` function's machine code can be loaded into memory on-demand. If the computer's installation of the `bar` library is updated, the new code will be loaded the next time the program runs without needing any change in the program itself.
 
-<img src='https://doggo.ninja/e5Ed9l.png' />
+<img src='https://doggo.ninja/qMuyOL.png' />
 
 ### Dynamic Linking in the Wild
 
@@ -623,41 +627,41 @@ When the computer first boots up, memory accesses go directly to physical RAM. I
 
 This dictionary is actually called a *page table*, and this system of translating every memory access is called *paging*. Entries in the page table are called *pages* and each one represents how a certain chunk of virtual memory maps to RAM. These chunks are always a fixed size, and each processor architecture has a different page size. x86-64 has a default 4 KiB page size, meaning each page specifies the mapping for a block of memory 4,096 bytes long. (x86-64 also allows operating systems to enable larger 2 MiB or 4 GiB pages, which can improve address translation speed but increase memory fragmentation and waste.)
 
-The page table itself just resides in physical RAM. While it can contain millions of entries, each entry's size is only on the order of a couple bytes, so the page table doesn't take up too much space.
+The page table itself just resides in RAM. While it can contain millions of entries, each entry's size is only on the order of a couple bytes, so the page table doesn't take up too much space.
 
-<p align='center'>
-	<img src='https://doggo.ninja/2qY74r.png' width='600' />
-</p>
+To enable paging at boot, the kernel first constructs the page table in RAM. Then, it stores the physical address of the start of the page table in a register called the page table base register (PTBR). Finally, the kernel enables paging to translate all memory accesses with the MMU. On x86-64, the top 20 bits of control register 3 (CR3) function as the PTBR. Bit 31 of CR0, designated PG for Paging, is set to 1 to enable paging.
 
 The magic of the paging system is that the page table can be edited while the computer is running. This is how each process can have its own isolated memory space— when the OS switches context from one process to another, an important task is remapping the virtual memory space to a different area in physical memory. Let's say you have two processes: process A can have its code and data (likely loaded from an ELF file!) at `0x00200000`, and process B can access its code and data from the very same address. Those two processes can even be the same program, because they aren't actually fighting over that address range! The data for process A is somewhere far from process B in physical memory, and is mapped to `0x00200000` by the kernel when switching to the process.
 
-[diagram: two processes accessing different parts of memory]
+<img src='https://doggo.ninja/RvBavh.png' />
 
 ### Security with Paging
 
-This process isolation improves code ergonomics (processes don't need to be aware of other processes to allocate memory), but it also creates a level of security: processes cannot access memory from other processes. This half answers one of the original questions from the start of this article:
+This process isolation improves code ergonomics (processes don't need to be aware of other processes to use memory), but it also creates a level of security: processes cannot access memory from other processes. This half answers one of the original questions from the start of this article:
 
 > If programs run directly on the CPU, and the CPU can directly access RAM, why can't code access memory from other processes, or, god forbid, the kernel?
 
 *Remember that? It feels like so long ago...*
 
-What about that kernel memory, though? I mean, first things first: the kernel obviously needs to store plenty data of its own to keep track of all the processes running and even the page table itself. Every time a hardware interrupt, software interrupt, or system call is triggered and the CPU enters kernel mode, the kernel code needs to access that memory somehow.
+What about that kernel memory, though? First things first: the kernel obviously needs to store plenty data of its own to keep track of all the processes running and even the page table itself. Every time a hardware interrupt, software interrupt, or system call is triggered and the CPU enters kernel mode, the kernel code needs to access that memory somehow.
 
-Linux's solution is to always allocate the top half of the virtual memory space to the kernel, and for this reason is called a [*higher half kernel*](https://wiki.osdev.org/Higher_Half_Kernel). Windows employs a [similar](https://learn.microsoft.com/en-us/windows-hardware/drivers/kernel/overview-of-windows-memory-space) technique, while macOS is... [slightly](https://www.researchgate.net/figure/Overview-of-the-Mac-OS-X-virtual-memory-system-which-resides-inside-the-Mach-portion-of_fig1_264086271) [more](https://developer.apple.com/library/archive/documentation/Performance/Conceptual/ManagingMemory/Articles/AboutMemory.html) [complicated](https://developer.apple.com/library/archive/documentation/Darwin/Conceptual/KernelProgramming/vm/vm.html) and caused my brain to ooze out of my ears reading about it.
+Linux's solution is to always allocate the top half of the virtual memory space to the kernel, so Linux is called a [*higher half kernel*](https://wiki.osdev.org/Higher_Half_Kernel). Windows employs a [similar](https://learn.microsoft.com/en-us/windows-hardware/drivers/kernel/overview-of-windows-memory-space) technique, while macOS is... [slightly](https://www.researchgate.net/figure/Overview-of-the-Mac-OS-X-virtual-memory-system-which-resides-inside-the-Mach-portion-of_fig1_264086271) [more](https://developer.apple.com/library/archive/documentation/Performance/Conceptual/ManagingMemory/Articles/AboutMemory.html) [complicated](https://developer.apple.com/library/archive/documentation/Darwin/Conceptual/KernelProgramming/vm/vm.html) and caused my brain to ooze out of my ears reading about it.
 
-[diagram of memory space with higher half kernel, with address ranges labeled]
+<img src='https://doggo.ninja/CcSonZ.png' />
 
 It would be terrible for security if userland processes could read or write kernel memory, though, so paging enables a second layer of security: each page must specify permission flags. One flag determines whether the region is writable or only readable. Another flag tells the CPU that only kernel mode is allowed to access the region's memory. This latter flag is used to protect the entire higher half kernel space — the entire kernel memory space is actually available in the virtual memory mapping for user space programs, they just don't have the permissions to access it.
 
-[diagram: page with annotations saying its permissions]
+<img src='https://doggo.ninja/Vp39ap.png' width='260' />
 
-The page table itself is one of the many things contained within the kernel memory space. When the timer chip triggers a hardware interrupt for process switching, the CPU switches the privilege level to kernel mode and jumps to Linux kernel code. Being in kernel mode (Intel ring 0) allows the CPU to access the kernel-protected memory region. The kernel can then write to the page table (residing somewhere in that upper half of memory) to remap the lower half of virtual memory for the new process. When the kernel switches to the new process and the CPU enters user mode, it can no longer access any of the kernel memory.
+The page table itself is actually contained within the kernel memory space! When the timer chip triggers a hardware interrupt for process switching, the CPU switches the privilege level to kernel mode and jumps to Linux kernel code. Being in kernel mode (Intel ring 0) allows the CPU to access the kernel-protected memory region. The kernel can then write to the page table (residing somewhere in that upper half of memory) to remap the lower half of virtual memory for the new process. When the kernel switches to the new process and the CPU enters user mode, it can no longer access any of the kernel memory.
+
+Just about every memory access goes through the MMU. Interrupt descriptor table handler pointers? Those address the kernel's virtual memory space as well.
 
 ### Hierarchical Paging and Other Optimizations
 
-64-bit systems have memory addresses that are 64 bits long, meaning the theoretical max size for their virtual memory space is a whopping 16 [exbibytes](https://en.wiktionary.org/wiki/exbibyte). That is incredibly large, far larger than any computer that exists today or will exist any time soon. As far as I can tell, the most RAM in any computer ever was in the [Blue Waters supercomputer](https://en.wikipedia.org/wiki/Blue_Waters), with over 1.5 petabytes of RAM. That's still less than 0.01% of 16 EiB.
+64-bit systems have memory addresses that are 64 bits long, meaning the 64-bit virtual memory space is a whopping 16 [exbibytes](https://en.wiktionary.org/wiki/exbibyte) in size. That is incredibly large, far larger than any computer that exists today or will exist any time soon. As far as I can tell, the most RAM in any computer ever was in the [Blue Waters supercomputer](https://en.wikipedia.org/wiki/Blue_Waters), with over 1.5 petabytes of RAM. That's still less than 0.01% of 16 EiB.
 
-If an entry in the page table was required for every 4 KiB section of virtual memory space, you would need 4,503,599,627,370,496 page table entries. With 8-byte-long page table entries, you would need 32 pebibytes of RAM just to store the page table alone. You may notice that's still larger than the world record for largest RAM in a computer.
+If an entry in the page table was required for every 4 KiB section of virtual memory space, you would need 4,503,599,627,370,496 page table entries. With 8-byte-long page table entries, you would need 32 pebibytes of RAM just to store the page table alone. You may notice that's still larger than the world record for the most RAM in a computer.
 
 > **Aside: why the weird units?**
 > 
@@ -665,21 +669,53 @@ If an entry in the page table was required for every 4 KiB section of virtual me
 
 Since it would be impossible (or at least incredibly impractical) to have sequential page table entries for the entire possible virtual memory space, CPU architectures implement *hierarchical paging*. In hierarchical paging systems, there are multiple levels of page tables of increasingly small granularity. The top level entries cover large blocks of memory and point to page tables of smaller blocks, creating a tree structure. The individual entries for blocks of 4 KiB or whatever the page size is are the leaves of the tree.
 
-x86-64 traditionally uses 4-level hierarchical paging. However, the designers also decided that there's no reason the address space has to be 16 EiB large, so they chose to ignore the top 16 bits of all virtual pointers. This allows page tables to be smaller. Each level of page table entry specifies bits that form its "prefix", meaning it covers all addresses starting with those bits. This shrinks the address space to 128 TiB, which is still sizable.
+x86-64 traditionally uses 4-level hierarchical paging. However, the designers also decided that there's no reason the address space has to be 16 EiB large, so they chose to ignore the top 16 bits of all virtual pointers. This allows page tables to be smaller, and only shrinks the address space to the still sizeable 128 TiB.
 
-[diagram of 4 level hierarchical paging]
+Each page table entry is found by offsetting the start of the containing table by a portion of the address. This portion starts with the most significant bits, which work as a prefix so the entry covers all addresses starting with those bits. The entry points to the start of the next level of table containing the subtrees for that block of memory, which are again indexed with the next collection of bits. Keep in mind the first 16 bits are skipped, so the "most significant bit" is actually bit 47.
 
-Many recent Intel processors implement [5-level paging](https://www.intel.com/content/www/us/en/content-details/671442/5-level-paging-and-5-level-ept-white-paper.html), adding another level of paging indirection as well as 9 more bits to expand the address space to 128 PiB. 5-level paging is supported by operating systems including Linux [since 2017](https://lwn.net/Articles/717293/), as well as recent Windows 10 and 11 server versions.
+<!-- big -->
+<img src='https://doggo.ninja/LfBBUZ.png' />
 
-At any level of the tree, the pointer to the next entry can be null (`0x0`) to indicate that there  
+Many recent Intel processors implement [5-level paging](https://en.wikipedia.org/wiki/Intel_5-level_paging), adding another level of paging indirection as well as 9 more bits to expand the address space to 128 PiB. 5-level paging is supported by operating systems including Linux [since 2017](https://lwn.net/Articles/717293/), as well as recent Windows 10 and 11 server versions. (Actually, 128 PiB is the new size of the virtual address space. It still only uses 52 bits of the physical addresses, meaning the maximum amount of physical memory is 4 PiB. This means the virtual address space is significantly larger than the maximum possible size of RAM.)
 
-The page table base registry
+Hierarchical paging solves the space problem because at any level of the tree, the pointer to the next entry can be null (`0x0`). This allows entire subtrees of the page table to be elided, meaning unmapped areas of the virtual memory space don't take up any space in RAM. Lookups at unmapped memory addresses can fail quickly because the CPU can error as soon as it sees an empty entry higher up in the tree. Page table entries also have a presence flag that can be used to mark them as unusable even if the address appears valid.
 
-### Swapping
+Another benefit of hierarchical paging is the ability to efficiently switch out large sections of the virtual memory space. A large swath of virtual memory might be mapped to one area of physical memory for one process, and a different area for another process. The kernel can store both mappings in memory and simply update the pointers at the top level of the tree when switching processes. If the entire memory space mapping was stored as a flat array of entries, the kernel would have to update a lot of entries, which would be slow and still require independently keeping track of the memory mappings for each process.
 
-paging on windows, dirty bit
+<a href='https://cpu-newsletter.kognise.repl.co/' class='undecorated' target='_blank'>
+	<p align='center'>
+		<img src='https://doggo.ninja/PwzcjA.png' width='600' />
+	</p>
+</a>
 
-Virtual addresses are even used for IDT entries. How does this work? Top half kernel etc.
+### Swapping and Demand Paging
+
+A memory access might fail for a couple reasons: the address might be out of range, it might not be mapped by the page table, or it might have an entry that's marked as not present. In any of these cases, the MMU will trigger a hardware interrupt called a *page fault* to let the kernel handle the problem.
+
+In some cases, the read was truly invalid or prohibited. In these cases, the kernel will probably terminate the program with a [segmentation fault](https://en.wikipedia.org/wiki/Segmentation_fault) error.
+
+> **Aside: segfault ontology**
+> 
+> "Segmentation fault" means different things in different contexts. The MMU triggers a hardware interrupt called a "segmentation fault" when memory is read without permission, but "segmentation fault" is also the name of a signal the OS can send to running programs to terminate them due to any illegal memory access.
+
+<!-- name: Shell session -->
+```
+$ ./program
+Segmentation fault (core dumped)
+$
+```
+
+In other cases, memory accesses can *intentionally* fail, allowing the OS to populate the memory and then *hand control back to the CPU to try again*. For example, the OS can map a file on disk to virtual memory without actually loading it into RAM, and then lazily load it into physical memory when the address is requested and a page fault occurs. This is called *demand paging*.
+
+[diagram: dialog between mmu/cpu and os demonstrating this lazy loading]
+
+For one, this allows for syscalls like [mmap](https://man7.org/linux/man-pages/man2/mmap.2.html) that lazily map entire files from disk to virtual memory to exist. If you're familiar with LLaMa.cpp, a runtime for a leaked Facebook language model, Justine Tunney recently significantly optimized it by [making all the loading logic use mmap](https://justine.lol/mmap/). (If you haven't heard of her before, [check her stuff out](https://justine.lol/)! Cosmopolitan Libc and APE are really cool and might be interesting if you've been enjoying this article.)
+
+> Apparently there's a [lot](https://rentry.org/Jarted) [of](https://news.ycombinator.com/item?id=35413289) [drama](https://news.ycombinator.com/item?id=35458004) about Justine's involvement in this change. Just pointing this out so I don't get screamed at by random internet users. I must confess that I haven't read most of the drama, and everything I said about Justine's stuff being cool is still very true.
+
+Demand paging also enables the technique that you've probably seen under the name "swapping" or "paging." Operating systems can free up physical memory by writing memory pages to disk and then removing them from physical memory but keeping them in virtual memory with the present flag set to 0. If that virtual memory is read, the OS can then restore the memory from disk to RAM and set the present flag back to 1. The OS may have to swap a different section of RAM to make space for the memory being loaded from disk. Disk reads and writes are slow, so operating systems try to make swapping happen as little as possible with [efficient page replacement algorithms](https://en.wikipedia.org/wiki/Page_replacement_algorithm).
+
+A fun hack is to use page table physical memory pointers to store the locations of files within physical storage. Since the MMU will page fault as soon as it sees a negative present flag, it doesn't matter that they are invalid memory addresses. This isn't exactly practical in all cases, but it's fun to think about.
 
 ## Part 6: Let's Talk About Forks and Cows
 
@@ -716,6 +752,8 @@ Cows:
 - ChatGPT 3 and GPT-4 acknowledgement, also Warp AI
 - Funny implications of unix is not meant to be shut down
 - Two Rings to Rule Them All
+- Most Linux users probably have a sufficiently interesting life that they spend little time imagining how page tables are represented in the kernel. -https://lwn.net/Articles/106177/
+- The only problem is that some hardware actually supports four-level tables. The example which is driving the current changes is x86-64. The current x86-64 port emulates a three-level architecture by using a single, shared, top-level directory ("PML4") and fitting (most of) the virtual address space in a three-level tree pointed to by a single PML4 entry. It all works, but it limits Linux processes to a mere 512GB of virtual address space. Such limits are irksome to the kernel developers when the hardware can do more, and, besides, somebody is likely to release a web browser or office suite which runs into that limit in the near future.
 - Credits:
 	- My parents
 	- Nicky Case
@@ -723,3 +761,4 @@ Cows:
 	- Spencer Pogorzelski
 	- https://github.com/ma1ted/
 	- https://github.com/polypixeldev
+- diagrams on figma!

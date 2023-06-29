@@ -46,12 +46,13 @@ text = text.replace(
 //   style="margin: 0 auto;".
 // - Add correct width and height information to images.
 //   (!! UNIMPLEMENTED !!)
+// - Add big class when prefixed with <!-- big -->
 // 
 // Non-self-closing image tags convert but will break MDX.
 // 
 // Image attribute order MUST be: src, width
 text = text.replace(
-	/(?:<p +align=['"](?<align>[A-z]+)['"]>\s*)?<img +src=['"](?<src>[\-_.~!*();:@&=+$,/?%#A-z0-9]+?)['"](?: +width=['"](?<width>\d+)['"])? *\/?>(?:\s*<\/p>)?/g,
+	/(?<big><!-- *big *-->\n?)?(?:<p +align=['"](?<align>[A-z]+)['"]>\s*)?<img +src=['"](?<src>[\-_.~!*();:@&=+$,/?%#A-z0-9]+?)['"](?: +width=['"](?<width>\d+)['"])? *\/?>(?:\s*<\/p>)?/g,
 	(...args) => {
 		const groups = args.at(-1)
 
@@ -61,6 +62,7 @@ text = text.replace(
 
 		let code = `<img src='${groups.src}'`
 		if (styles.length > 0) code += ` style='${styles.join(' ')}'`
+		if (groups.big) code += ` class='big'`
 		code += ' />'
 
 		return code
