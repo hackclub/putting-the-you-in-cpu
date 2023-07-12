@@ -11,7 +11,7 @@ I finally cracked and decided to go all-in on figuring out as much as possible. 
 
 And you know what they say... you only truly understand something if you can explain it to someone else.
 
-> Feel like you know this stuff already? Read part 3 and I *guarantee* you will learn at least one new interesting technical detail. Unless you're like, Linus Torvalds, or a kernel developer who's worked heavily on exec syscalls.
+> Feel like you know this stuff already? Read [part 3](#part-3-how-to-run-a-program) and I *guarantee* you will learn at least one new interesting technical detail. Unless you're like, Linus Torvalds, or a kernel developer who's worked heavily on exec syscalls.
 
 ## Part 1: The "Basics"
 
@@ -27,7 +27,7 @@ The first mass-produced CPU was the [Intel 4004](http://www.intel4004.com/), des
 
 The "instructions" that CPUs execute are just binary data: a byte or two to represent what instruction is being run (the opcode), followed by whatever data is needed to run the instruction. What we call *machine code* is nothing but a series of these binary instructions in a row. [Assembly](https://en.wikipedia.org/wiki/Assembly_language) is a helpful syntax for reading and writing machine code that's easier for humans to read and write than raw bits; it is always compiled down to the binary that your CPU knows how to read.
 
-<img src='https://doggo.ninja/Cv9OdX.png' width='400' />
+<img src='images/assembly-to-machine-code-translation.png' width='400' alt='A diagram demonstrating how machine code translates to assembly and back. A bidirectional arrow connects three examples: Machine Code (Binary) followed by 3 bytes of binary numbers, Machine Code (Hex) followed by those 3 bytes translated to hex (0x83, 0xC3, 0x0A), and Assembly followed by "add ebx, 10". The Assembly and Machine Code are color-coded so it is clear that each byte of the machine code translate to one word in the assembly.' />
 
 > An aside: instructions aren't always represented 1:1 in machine code like the above example. For example, `add eax, 512` translates to `05 00 02 00 00`.
 > 
@@ -40,7 +40,7 @@ RAM is your computer's main memory bank, a large multi-purpose space which store
 The CPU stores an *instruction pointer* which points to the location in RAM where it's going to fetch the next instruction. After executing each instruction, the CPU moves the pointer and repeats. This is the *fetch-execute cycle*.
 
 <p align='center'>
-	<img src='https://doggo.ninja/23nqBP.png' width='360' />
+	<img src='images/fetch-execute-cycle.png' width='360' alt='A diagram demonstrating the fetch-execute cycle. There are two bubbles of text. The first is labeled "Fetch" and has the text "Read instruction from memory at the current instruction pointer." The second is titled "Execute" and has the text "Run the instruction and then move the instruction pointer." The fetch bubble has an arrow pointing to the execute bubble, and the execute bubble has an arrow pointing back to the fetch bubble, implying a repeated process.' />
 </p>
 
 After executing an instruction, the pointer moves forward to immediately after the instruction in RAM so that it now points to the next instruction. That's why code runs! The instruction pointer just keeps chugging forward, executing machine code in the order in which it's in memory. Some instructions can tell the instruction pointer to jump somewhere else instead, or jump different places depending on a certain condition; this makes reusable code and conditional logic possible.
@@ -57,7 +57,7 @@ Let's go back to the original question: what happens when you run an executable 
 
 (This was one of those psyching-myself-out moments for me — seriously, this is how the program you are using to read this article is running. Your CPU is fetching your browser's instructions from RAM in sequence and directly executing them, and they're rendering this article.)
 
-<img src='https://doggo.ninja/CuKAdU.png' width='400' />
+<img src='images/instruction-pointer.png' width='400' alt='A diagram depicting a series of bytes of machine code in RAM. A highlighted byte is pointed to by an arrow labeled "Instruction Pointer," and there are arrows representing how the instruction pointer moves forward in RAM.' />
 
 It turns out CPUs have a super basic worldview; they only see the current instruction pointer and a bit of internal state. Processes are entirely operating system abstractions, not something CPUs natively understand or keep track of.
 
@@ -90,7 +90,7 @@ In kernel mode, anything goes: the CPU is allowed to execute any supported instr
 Processors start in kernel mode. Before executing a program, the kernel initiates the switch to user mode.
 
 <p align='center'>
-	<img src='https://doggo.ninja/C9ENjY.png' width='500' />
+	<img src='images/kernel-mode-vs-user-mode.png' width='500' alt='Two fake iMessage screenshots demonstrating the different between user and kernel mode protections. The first, labeled Kernel Mode: right side says "Read this protected memory!", left side replies "Here you go, dear :)". The second, labeled User Mode: right side says "Read this protected memory!", left side replies "No! Segmentation fault!"' />
 </p>
 
 An example of how processor modes manifest in a real architecture: on x86-64, the current privilege level (CPL) can be read from a register called `cs` (code segment). Specifically, the CPL is contained in the two [least significant bits](https://en.wikipedia.org/wiki/Bit_numbering) of the `cs` register. Those two bits can store x86-64's four possible rings: ring 0 is kernel mode and ring 3 is user mode. Rings 1 and 2 are designed for running drivers but are only used by a handful of older niche operating systems. If the CPL bits are `11`, for example, the CPU is running in ring 3: kernel mode.
@@ -105,13 +105,13 @@ User space to kernel space control transfers are accomplished using a processor 
 
 1. During the boot process, the operating system stores a table called an [*interrupt vector table*](https://en.wikipedia.org/wiki/Interrupt_vector_table) (IVT; x86-64 calls this the [interrupt descriptor table](https://en.wikipedia.org/wiki/Interrupt_descriptor_table)) in RAM and registers it with the CPU. The IVT maps interrupt numbers to handler code pointers.
 
-  <p align='center'><img src='https://doggo.ninja/lmiysV.png' width='250' /></p>
+  <p align='center'><img src='images/interrupt-vector-table.png' width='300' alt='A image of a table captioned "Interrupt Vector Table". The first column, labeled with a number sign, has a series of numbers starting at 01 and going to 04. The corresponding second column of the table, labeled "Handler Address", contains a random 8-byte-long hex number per entry. The bottom of the table has the text "So on and such forth..."' /></p>
 
 2. Then, userland programs can use an instruction like [INT](https://www.felixcloutier.com/x86/intn:into:int3:int1) which tells the processor to look up the given interrupt number in the IVT, switch to kernel mode, and then jump the instruction pointer to the memory address stored in the IVT.
 
 When this kernel code finishes, it tells the CPU to switch back to user mode and return the instruction pointer to where it was when the interrupt was triggered. This is accomplished using an instruction like [IRET](https://www.felixcloutier.com/x86/iret:iretd:iretq).
 
-(If you were curious, the interrupt id used for system calls on Linux is `0x80`. You can read a list of Linux's system calls on [Michael Kerrisk's online manpage directory](https://man7.org/linux/man-pages/man2/syscalls.2.html).)
+(If you were curious, the interrupt id used for system calls on Linux is `0x80`. You can read a list of Linux system calls on [Michael Kerrisk's online manpage directory](https://man7.org/linux/man-pages/man2/syscalls.2.html).)
 
 #### Wrapper APIs: Abstracting Away Interrupts
 
@@ -126,10 +126,10 @@ Programs need to pass data to the operating system when triggering a syscall; th
 The variance in how system calls are called across devices means it would be wildly impractical for programmers to implement system calls themselves for every program. This would also mean operating systems couldn't change their interrupt handling for fear of breaking every program that was written to use the old system. Finally, we typically don't write programs in raw assembly anymore... programmers can't be expected to drop down to assembly any time they want to read a file or allocate memory.
 
 <p align='center'>
-	<img src='https://doggo.ninja/eX2rWN.png' width='650' />
+	<img src='images/syscall-architecture-differences.png' width='650' alt='A drawing captioned "System calls are implemented differently across architectures." On the left is a smiling CPU receiving some binary and spitting out a filename, file.txt. Separated on the right is a different CPU receiving the same binary data but with a confused and nauseous facial expression.' />
 </p>
 
-So, operating systems provide an abstraction layer on top of these interrupts. Reusable higher-level library functions that wrap the necessary assembly instructions are provided by [libc](https://www.gnu.org/software/libc/) on Unix-like systems and part of a library called [`ntdll.dll`](https://learn.microsoft.com/en-us/windows-hardware/drivers/kernel/libraries-and-headers) on Windows. Calls to these library functions themselves don't cause switches to kernel mode, they're just standard function calls. Inside the libraries, assembly code does actually transfer control to the kernel, and is a lot more platform-dependent than the wrapping library subroutine.
+So, operating systems provide an abstraction layer on top of these interrupts. Reusable higher-level library functions that wrap the necessary assembly instructions are provided by [libc](https://www.gnu.org/software/libc/) on Unix-like systems and part of a library called [ntdll.dll](https://learn.microsoft.com/en-us/windows-hardware/drivers/kernel/libraries-and-headers) on Windows. Calls to these library functions themselves don't cause switches to kernel mode, they're just standard function calls. Inside the libraries, assembly code does actually transfer control to the kernel, and is a lot more platform-dependent than the wrapping library subroutine.
 
 When you call `exit(1)` from C running on a Unix-like system, that function is internally running machine code to trigger an interrupt, after placing the system call's opcode and arguments in the right registers/stack/whatever. Computers are so cool!
 
@@ -169,9 +169,8 @@ How do you take control back from program code? After a bit of research, you dis
 
 Earlier, we talked about how software interrupts are used to hand control from a userland program to the OS. These are called “software” interrupts because they’re voluntarily triggered by a program — machine code executed by the processor in the normal fetch-execute cycle tells it to switch control to the kernel.
 
-
 <p align='center'>
-	<img src='https://doggo.ninja/xG5REv.png' width='500' />
+	<img src='images/keyboard-hardware-interrupt.png' width='500' alt='A drawing illustrating how hardware interrupts break normal execution. On top: a drawing of a keyboard with a highlighted key, with a lightning bolt drawn to a CPU on the right. On the bottom: some binary labeled "program code," a similar lightning bolt, and some more binary labeled "kernel code." The lightning bolt is labeled "interrupt triggers context switch."' />
 </p>
 
 OS schedulers use *timer chips* like [PITs](https://en.wikipedia.org/wiki/Programmable_interval_timer) to trigger hardware interrupts for multitasking:
@@ -198,7 +197,7 @@ A slight improvement to fixed timeslice scheduling is to pick a *target latency*
 Process switching is computationally expensive because it requires saving the entire state of the current program and restoring a different one. Past a certain threshold, too small a calculated timeslice can result in worse performance than having a longer fixed timeslice. It's common to have a fixed timeslice that serves as a lower bound when there are many processes. At the time of writing this article, Linux's scheduler uses a target latency of 6&nbsp;ms and a minimum granularity of 0.75&nbsp;ms.
 
 <p align='center'>
-	<img src='https://doggo.ninja/XBMA41.png' width='500' />
+	<img src='images/linux-scheduler-target-latency.png' width='500' alt='A diagram titled "Naive Dynamic Timeslice Round-Robin Scheduling." It depicts a time series of 3 different processes getting time to execute in a repeated cycle. In between the execution blocks of each process is a much shorter block labeled "kernel scheduler." The length of each program execution block is labeled "timeslice (2ms)." The distance from the start of process 1 executing to the next start of process 1 executing, encompassing the execution time of processes 2 and 3, is labeled as "target latency (6ms)."' />
 </p>
 
 Round-robin scheduling with this basic timeslice calculation is close to what most computers do nowadays. It's still a bit naive; most operating systems tend to have more complex schedulers which take process priorities and deadlines into account. Since 2007, Linux has used a scheduler called [Completely Fair Scheduler](https://docs.kernel.org/scheduler/sched-design-CFS.html). CFS does a bunch of very fancy computer science things to prioritize tasks and divvy up CPU time.
@@ -219,7 +218,7 @@ Ancient operating systems, including classic Mac OS and versions of Windows long
 
 This is called [*cooperative multitasking*](https://en.wikipedia.org/wiki/Cooperative_multitasking). It has a couple major flaws: malicious or just poorly designed programs can easily freeze the entire operating system, and it's nigh impossible to ensure temporal consistency for realtime/time-sensitive tasks. For these reasons, the tech world switched to preemptive multitasking a long time ago and never looked back.
 
-## Part 3: The Double-Click
+## Part 3: How to Run a Program
 
 So far, we've covered how CPUs execute machine code loaded from executables, what ring-based security is, and how syscalls work. In this section, we'll dive deep into the Linux kernel to figure out how programs are loaded and run in the first place.
 
@@ -233,14 +232,16 @@ Most of what we learn will generalize very well to other operating systems and a
 ### Basic Behavior of Exec Syscalls
 
 <p align='center'>
-	<img src='https://doggo.ninja/2hUW7l.png' width='600' />
+	<img src='images/linux-program-execution-process.png' width='600' alt='A flowchart demonstrating exec syscalls. On the left, a group of flowchart items labeled "user space," on the right, a group labeled "kernel space." Starting in the user space group: the user runs ./file.bin in their terminal, which then runs the syscall execve("./file.bin", ...). This flows to the SYSCALL instruction being executed, which then points to the first item in the kernel space group: "Load and set up a binary" which points to "Try a binfmt." If the binfmt is supported, it starts the new process (replacing the current). If not, it tries the binfmt again.' />
 </p>
 
 Let's start with a very important system call: `execve`. It loads a program and, if successful, replaces the current process with that program. A couple other syscalls (`execlp`, `execvpe`, etc.) exist, but they all layer on top of `execve` in various fashions.
 
+> **Aside: `execveat`**
+> 
 > `execve` is *actually* built on top of `execveat`, a more general syscall that runs a program with some configuration options. For simplicity, we'll mostly talk about `execve`; the only difference is that it provides some defaults to `execveat`.
 >
-> What does the `ve` stand for? The `v` means one parameter is the vector (list) of arguments (`argv`), and the `e` means another parameter is the vector of environment variables (`envp`). Various other exec syscalls have different suffices to designate different call signatures. The `at` in `execveat` is just "at", because it specifies the location to run `execve` at.
+> Curious what `ve` stands for? The `v` means one parameter is the vector (list) of arguments (`argv`), and the `e` means another parameter is the vector of environment variables (`envp`). Various other exec syscalls have different suffices to designate different call signatures. The `at` in `execveat` is just "at", because it specifies the location to run `execve` at.
 
 The call signature of `execve` is:
 
@@ -339,7 +340,7 @@ The first major job of `do_execveat_common` is setting up a struct called `linux
 
 Let's take a closer look at this buffer `buf`:
 
-[include/linux/binfmts.h](https://github.com/torvalds/linux/blob/22b8cc3e78f5448b4c5df00303817a9137cd663f/include/linux/binfmts.h#L64):
+[linux_binprm @ include/linux/binfmts.h](https://github.com/torvalds/linux/blob/22b8cc3e78f5448b4c5df00303817a9137cd663f/include/linux/binfmts.h#L64):
 
 ```c
 	char buf[BINPRM_BUF_SIZE];
@@ -389,7 +390,7 @@ I always just assumed these were handled by the shell, but no! Shebangs are actu
 
 Take a look at how `fs/binfmt_script.c` checks if a file starts with a shebang:
 
-[fs/binfmt_script.c](https://github.com/torvalds/linux/blob/22b8cc3e78f5448b4c5df00303817a9137cd663f/fs/binfmt_script.c#L40-L42):
+[load_script @ fs/binfmt_script.c](https://github.com/torvalds/linux/blob/22b8cc3e78f5448b4c5df00303817a9137cd663f/fs/binfmt_script.c#L40-L42):
 
 ```c
 	/* Not ours to exec if we don't start with "#!". */
@@ -405,13 +406,13 @@ There are two interesting, wonky things going on here.
 
 During my research, I read an article that described the buffer as 128 bytes long. At some point after that article was published, the length was doubled to 256 bytes! Curious why, I checked the Git blame — a log of everybody who edited a certain line of code — for the line where `BINPRM_BUF_SIZE` is defined in the Linux source code. Lo and behold...
 
-<img src='https://doggo.ninja/nHzI0U.png' width='550' />
+<img src='images/binprm-buf-changelog.png' width='550' alt='A screenshot of a Git blame window from the Visual Studio Code editor. The git blame shows the line "#define BINPRM_BUF_SIZE 128" being changed to 256. The commit is by Oleg Nesterov, and the main text is "exec: increase BINPRM_BUF_SIZE to 256. Large enterprise clients often run applications out of networked file systems where the IT mandated layout of project volumes can end up leading to paths that are longer than 128 characters.  Bumping this up to the next order of two solves this problem in all but the most egregious case while still fitting into a 512b slab." The commit is signed off by Linus Torvalds, among others.' />
 
 COMPUTERS ARE SO COOL!
 
 Since shebangs are handled by the kernel, and pull from `buf` instead of loading the whole file, they're *always* truncated to the length of `buf`. Apparently, 4 years ago, someone got annoyed by the kernel truncating their >128-character paths, and their solution was to double the truncation point by doubling the buffer size! Today, on your very own Linux machine, if you have a shebang line more than 256 characters long, everything past 256 characters will be *completely lost*.
 
-<img src='https://doggo.ninja/qzrNW9.png' width='500' />
+<img src='images/linux-shebang-truncation.png' width='500' alt='A diagram depicting shebang truncation. A large array of bytes from a file named file.bin. The first 256 bytes are highlighted and labeled "Loaded into buf," while the remaining bytes are translucent and labeled "Ignored, past 256 bytes."' />
 
 Imagine having a bug because of this. Imagine trying to figure out the root cause of what's breaking your code. Imagine how it would feel, discovering that the problem is deep within the Linux kernel. Woe to the next IT person at a massive enterprise who discovers that part of a path has mysteriously gone missing.
 
@@ -478,7 +479,7 @@ We pretty thoroughly understand `execve` now. At the end of most paths, the kern
 
 <p>
 	<p align='center'>
-		<img src='https://doggo.ninja/2eXsg7.jpg' width='260' />
+		<img src='images/gnu-linux-elf-drawing.jpg' width='260' alt='A marker drawing on paper. A wizard elf is shown meditating, holding the head of a gnu in one hand and a Linux penguin in the other. The elf trails off, saying "Well, actually, Linux is just the kernel, the operating system is..." The drawing is captioned in red marker: "You&apos;ve heard of elf on a shelf! Now, get ready for... elf on a GNU/Linux." The drawing is signed "Nicky."' />
 	</p>
 </p>
 <div align='center'>
@@ -511,7 +512,7 @@ $ wc -l binfmt_* | sort -nr | sed 1d
 Before looking more deeply at how `binfmt_elf` executes ELF files, let's take a look at the file format itself. ELF files are typically made up of four parts:
 
 <p align='center'>
-	<img src='https://doggo.ninja/QKEVvn.png' width='500' />
+	<img src='images/elf-file-structure.png' width='500' alt='A diagram showing an overview of the structure of ELF files, with four sequential sections. Section 1, ELF Header: basic information about the binary, and locations of PHT and SHT. Section 2, Program Header Table (PHT): describes how and where to load the ELF file&apos;s data into memory. Section 3, Section Header Table (SHT): optional "map" of the data to assist in debugging. Section 4, Data: all of the binary&apos;s data. The PHT and SHT point into this section.' />
 </p>
 
 #### ELF Header
@@ -529,7 +530,7 @@ The ELF header is always at the start of the file. It specifies the locations of
 The [program header table](https://refspecs.linuxbase.org/elf/gabi4+/ch5.pheader.html) is a series of entries containing specific details for how to load and execute the binary at runtime. Each entry has a type field that says what detail it's specifying — for example, `PT_LOAD` means it contains data that should be loaded into memory, but `PT_NOTE` means the segment contains informational text that shouldn't necessarily be loaded anywhere.
 
 <p align='center'>
-	<img src='https://doggo.ninja/GfQ2au.png' width='500' />
+	<img src='images/elf-program-header-types.png' width='500' alt='A table showing four different common program header types. Type 1, PT_LOAD: data to be loaded into memory. Type 2, PT_NOTE: freeform text like copyright notices, version info, etc.. Type 3, PT_DYNAMIC: Info about dynamic linking. Type 4, PT_INTERP: Path to the location of an "ELF interpreter."' />
 </p>
 
 Each entry specifies information about where its data is in the file and, sometimes, how to load the data into memory:
@@ -544,7 +545,7 @@ Each entry specifies information about where its data is in the file and, someti
 The [section header table](https://refspecs.linuxbase.org/elf/gabi4+/ch4.sheader.html) is a series of entries containing information about *sections*. This section information is like a map, charting the data inside the ELF file. It makes it easy for [programs like debuggers](https://www.sourceware.org/gdb/) to understand the intended uses of different portions of the data.
 
 <p align='center'>
-	<img src='https://doggo.ninja/1wWVt9.png' width='450' />
+	<img src='images/elf-section-header-table-diagram.png' width='450' alt='An old treasure map with islands, rivers, palm trees, and a compass rose. Some of the islands are labeled with ELF section names such as ".text", ".data", ".shstrtab", and ".bss". The drawing is captioned "The section header table is like a map for binary data."' />
 </p>
 
 For example, the program header table can specify a large swath of data to be loaded into memory together. That single `PT_LOAD` block might contain both code and global variables! There's no reason those have to be specified separately to *run* the program; the CPU just starts at the entry point and steps forward, accessing data when and where the program requests it. However, software like a debugger for *analyzing* the program needs to know exactly where each area starts and ends, otherwise it might try to decode some text that says "hello" as code (and since that isn't valid code, explode). This information is stored in the section header table.
@@ -563,7 +564,7 @@ Each section has a name, a type, and some flags that specify how it's intended t
 
 The program and section header table entries all point to blocks of data within the ELF file, whether to load them into memory, to specify where program code is, or just to name sections. All of these different pieces of data are contained in the data section of the ELF file.
 
-<img src='https://doggo.ninja/o283Vt.png' width='680' />
+<img src='images/elf-data-section.png' width='680' alt='A diagram demonstrating how different parts of the ELF file reference locations within the data block. A continuous collection of data is depicted, fading out at the end, containing some clearly recognizable things such as the path to an ELF interpreter, the section title ".rodata", and the string "Hello, world!" A couple example ELF sections float above the data block, with arrows pointing to their data. For example, the data sections from both the PHT and SHT entry examples point to the same "Hello, world!" text. The SHT entry&apos;s label is also stored in the data block.' />
 
 ### A Brief Explanation of Linking 
 
@@ -579,7 +580,7 @@ However, some libraries are super common. You'll find libc is used by basically 
 
 If a statically linked program needs a function `foo` from a library called `bar`, the program would include a copy of the entirety of `foo`. However, if it's dynamically linked it would only include a reference saying "I need `foo` from library `bar`." When the program is run, `bar` is hopefully installed on the computer and the `foo` function's machine code can be loaded into memory on-demand. If the computer's installation of the `bar` library is updated, the new code will be loaded the next time the program runs without needing any change in the program itself.
 
-<img src='https://doggo.ninja/qMuyOL.png' />
+<img src='images/static-vs-dynamic-linking.png' alt='A diagram showing the difference between static and dynamic linking. On the left, static linking is shown with the contents of some code called "foo" being separately copied into two programs. This is accompanied with text saying that library functions are copied from the developer&apos;s computer into each binary at built time. On the right side, dynamic linking is shown: each program contains the name of the "foo" function, with arrows pointing outside the programs into the foo program lying on the user&apos;s computer. This is paired with accompanying text stating that binaries reference the names of library functions, which are loaded from the user&apos;s computer at runtime.' />
 
 ### Dynamic Linking in the Wild
 
@@ -620,24 +621,34 @@ So... about memory. It turns out that when the CPU reads from or writes to a mem
 The CPU talks to a chip called a [*memory management unit*](https://en.wikipedia.org/wiki/Memory_management_unit) (MMU). The MMU works like a translator, keeping track of a mapping between locations in virtual memory to the location in RAM which functions like a dictionary. When the CPU is given an instruction to read from memory address `0xAD4DA83F`, it asks the MMU to translate that address. The MMU looks it up in the dictionary, discovers that the matching physical address is `0x70B7BD74`, and sends the number back to the CPU. The CPU can then read from that address in RAM.
 
 <p align='center'>
-	<img src='https://doggo.ninja/EOU5pQ.png' width='600' />
+	<img src='images/virtual-memory-mmu-example.png' width='640' alt='A drawing of a smiling CPU and an MMU having a conversation. The MMU is a tall chip, wearing library glasses, and holding a large book labeled "Dictionary: Pointers 0x0000 to 0xffff." The CPU asks the MMU to translate a long memory address starting with 0xfffa. The MMU thinks for a second, and responds with a different pointer starting with 0x52a4.' />
 </p>
 
 When the computer first boots up, memory accesses go directly to physical RAM. Immediately after startup, the OS creates the translation dictionary and tells the CPU to start using the MMU.
 
 This dictionary is actually called a *page table*, and this system of translating every memory access is called *paging*. Entries in the page table are called *pages* and each one represents how a certain chunk of virtual memory maps to RAM. These chunks are always a fixed size, and each processor architecture has a different page size. x86-64 has a default 4 KiB page size, meaning each page specifies the mapping for a block of memory 4,096 bytes long. (x86-64 also allows operating systems to enable larger 2 MiB or 4 GiB pages, which can improve address translation speed but increase memory fragmentation and waste.)
 
-The page table itself just resides in RAM. While it can contain millions of entries, each entry's size is only on the order of a couple bytes, so the page table doesn't take up too much space.
+The page table itself just resides in RAM. While it can contain millions of entries, each entry's size is only on the order of a couple bytes, so the page table doesn't take up too much space.*
 
 To enable paging at boot, the kernel first constructs the page table in RAM. Then, it stores the physical address of the start of the page table in a register called the page table base register (PTBR). Finally, the kernel enables paging to translate all memory accesses with the MMU. On x86-64, the top 20 bits of control register 3 (CR3) function as the PTBR. Bit 31 of CR0, designated PG for Paging, is set to 1 to enable paging.
 
-The magic of the paging system is that the page table can be edited while the computer is running. This is how each process can have its own isolated memory space— when the OS switches context from one process to another, an important task is remapping the virtual memory space to a different area in physical memory. Let's say you have two processes: process A can have its code and data (likely loaded from an ELF file!) at `0x00200000`, and process B can access its code and data from the very same address. Those two processes can even be the same program, because they aren't actually fighting over that address range! The data for process A is somewhere far from process B in physical memory, and is mapped to `0x00200000` by the kernel when switching to the process.
+The magic of the paging system is that the page table can be edited while the computer is running. This is how each process can have its own isolated memory space — when the OS switches context from one process to another, an important task is remapping the virtual memory space to a different area in physical memory. Let's say you have two processes: process A can have its code and data (likely loaded from an ELF file!) at `0x00200000`, and process B can access its code and data from the very same address. Those two processes can even be the same program, because they aren't actually fighting over that address range! The data for process A is somewhere far from process B in physical memory, and is mapped to `0x00200000` by the kernel when switching to the process.
 
-<img src='https://doggo.ninja/RvBavh.png' />
+<img src='images/process-virtual-memory-mapping.png' alt='A diagram showing two different processes asking a cheesy clip art image of an anthropomorphic desktop computer to translate the same memory address. The anthropomorphic computer responds to each process with a different section from within the continous strip of physical memory.' />
+
+> **Aside: cursed ELF fact**
+>
+> In certain situations, `binfmt_elf` has to map the first page of memory to zeroes. Some programs written for UNIX System V Release 4.0 (SVr4), an OS from 1988 that was the first to support ELF, rely on null pointers being readable. And somehow, some programs still rely on that behavior.
+>
+> It seems like the Linux kernel dev implementing this was [a little disgruntled](https://github.com/torvalds/linux/blob/22b8cc3e78f5448b4c5df00303817a9137cd663f/fs/binfmt_elf.c#L1322-L1329):
+>
+> *"Why this, you ask???  Well SVr4 maps page 0 as read-only, and some applications 'depend' upon this behavior. Since we do not have the power to recompile these, we emulate the SVr4 behavior. Sigh."*
+>
+> Sigh.
 
 ### Security with Paging
 
-This process isolation improves code ergonomics (processes don't need to be aware of other processes to use memory), but it also creates a level of security: processes cannot access memory from other processes. This half answers one of the original questions from the start of this article:
+The process isolation enabled by memory paging improves code ergonomics (processes don't need to be aware of other processes to use memory), but it also creates a level of security: processes cannot access memory from other processes. This half answers one of the original questions from the start of this article:
 
 > If programs run directly on the CPU, and the CPU can directly access RAM, why can't code access memory from other processes, or, god forbid, the kernel?
 
@@ -647,11 +658,11 @@ What about that kernel memory, though? First things first: the kernel obviously 
 
 Linux's solution is to always allocate the top half of the virtual memory space to the kernel, so Linux is called a [*higher half kernel*](https://wiki.osdev.org/Higher_Half_Kernel). Windows employs a [similar](https://learn.microsoft.com/en-us/windows-hardware/drivers/kernel/overview-of-windows-memory-space) technique, while macOS is... [slightly](https://www.researchgate.net/figure/Overview-of-the-Mac-OS-X-virtual-memory-system-which-resides-inside-the-Mach-portion-of_fig1_264086271) [more](https://developer.apple.com/library/archive/documentation/Performance/Conceptual/ManagingMemory/Articles/AboutMemory.html) [complicated](https://developer.apple.com/library/archive/documentation/Darwin/Conceptual/KernelProgramming/vm/vm.html) and caused my brain to ooze out of my ears reading about it.
 
-<img src='https://doggo.ninja/CcSonZ.png' />
+<img src='images/higher-half-kernel-memory-map.png' alt='A diagram showing virtual memory space as a strip. The left half is labeled user space: memory for the executing program. The right half is labeled kernel space: fixed area for everything kernel-related. The middle point splitting the two segments is labeled with the memory address 0x8000000000000000.' />
 
 It would be terrible for security if userland processes could read or write kernel memory, though, so paging enables a second layer of security: each page must specify permission flags. One flag determines whether the region is writable or only readable. Another flag tells the CPU that only kernel mode is allowed to access the region's memory. This latter flag is used to protect the entire higher half kernel space — the entire kernel memory space is actually available in the virtual memory mapping for user space programs, they just don't have the permissions to access it.
 
-<img src='https://doggo.ninja/Vp39ap.png' width='260' />
+<img src='images/page-table-entry-permissions.png' width='260' alt='A table of page table entry permissions. Present: true. Read/write: read only. User/kernel: all modes. Dirty: false. Accessed: true. Etcetera.' />
 
 The page table itself is actually contained within the kernel memory space! When the timer chip triggers a hardware interrupt for process switching, the CPU switches the privilege level to kernel mode and jumps to Linux kernel code. Being in kernel mode (Intel ring 0) allows the CPU to access the kernel-protected memory region. The kernel can then write to the page table (residing somewhere in that upper half of memory) to remap the lower half of virtual memory for the new process. When the kernel switches to the new process and the CPU enters user mode, it can no longer access any of the kernel memory.
 
@@ -669,34 +680,32 @@ If an entry in the page table was required for every 4 KiB section of virtual me
 
 Since it would be impossible (or at least incredibly impractical) to have sequential page table entries for the entire possible virtual memory space, CPU architectures implement *hierarchical paging*. In hierarchical paging systems, there are multiple levels of page tables of increasingly small granularity. The top level entries cover large blocks of memory and point to page tables of smaller blocks, creating a tree structure. The individual entries for blocks of 4 KiB or whatever the page size is are the leaves of the tree.
 
-x86-64 traditionally uses 4-level hierarchical paging. However, the designers also decided that there's no reason the address space has to be 16 EiB large, so they chose to ignore the top 16 bits of all virtual pointers. This allows page tables to be smaller, and only shrinks the address space to the still sizeable 128 TiB.
+x86-64 historically uses 4-level hierarchical paging. In this system, each page table entry is found by offsetting the start of the containing table by a portion of the address. This portion starts with the most significant bits, which work as a prefix so the entry covers all addresses starting with those bits. The entry points to the start of the next level of table containing the subtrees for that block of memory, which are again indexed with the next collection of bits.
 
-Each page table entry is found by offsetting the start of the containing table by a portion of the address. This portion starts with the most significant bits, which work as a prefix so the entry covers all addresses starting with those bits. The entry points to the start of the next level of table containing the subtrees for that block of memory, which are again indexed with the next collection of bits. Keep in mind the first 16 bits are skipped, so the "most significant bit" is actually bit 47.
+The designers of x86-64's 4-level paging also chose to ignore the top 16 bits of all virtual pointers to save page table space. 48 bits gets you a 128 TiB virtual address space, which was deemed to be large enough. (The full 64 bits would get you 16 EiB, which is kind of a lot.)
+
+Since the first 16 bits are skipped, the "most significant bits" for indexing the first level of the page table actually start at bit 47 rather than 63. This also means the higher half kernel diagram from earlier in this part was technically inaccurate; the kernel space start address should've been depicted as the midpoint of an address space smaller than 64 bits.
 
 <!-- big -->
-<img src='https://doggo.ninja/LfBBUZ.png' />
-
-Many recent Intel processors implement [5-level paging](https://en.wikipedia.org/wiki/Intel_5-level_paging), adding another level of paging indirection as well as 9 more bits to expand the address space to 128 PiB. 5-level paging is supported by operating systems including Linux [since 2017](https://lwn.net/Articles/717293/), as well as recent Windows 10 and 11 server versions. (Actually, 128 PiB is the new size of the virtual address space. It still only uses 52 bits of the physical addresses, meaning the maximum amount of physical memory is 4 PiB. This means the virtual address space is significantly larger than the maximum possible size of RAM.)
+<img src='images/multilevel-paging-explainer.png' alt='A large, detailed, and full-color diagram of 4-level paging on x86-64. It depicts the four levels of page tables, highlighting the bits that serve as a "prefix" at each level. It also shows the tables being indexed by those prefix bits by adding the value of the bits to the table&apos;s base address. The entries in each table point to the start of the next table, except for the final level 1 which points to the start of a 4 KiB block in RAM. The MMU adds the lowest 12 bits to that address to get the final physical address. There is one level 4 table, n-squared level 3 tables, and so on.' />
 
 Hierarchical paging solves the space problem because at any level of the tree, the pointer to the next entry can be null (`0x0`). This allows entire subtrees of the page table to be elided, meaning unmapped areas of the virtual memory space don't take up any space in RAM. Lookups at unmapped memory addresses can fail quickly because the CPU can error as soon as it sees an empty entry higher up in the tree. Page table entries also have a presence flag that can be used to mark them as unusable even if the address appears valid.
 
 Another benefit of hierarchical paging is the ability to efficiently switch out large sections of the virtual memory space. A large swath of virtual memory might be mapped to one area of physical memory for one process, and a different area for another process. The kernel can store both mappings in memory and simply update the pointers at the top level of the tree when switching processes. If the entire memory space mapping was stored as a flat array of entries, the kernel would have to update a lot of entries, which would be slow and still require independently keeping track of the memory mappings for each process.
 
-<a href='https://cpu-newsletter.kognise.repl.co/' class='undecorated' target='_blank'>
-	<p align='center'>
-		<img src='https://doggo.ninja/PwzcjA.png' width='600' />
-	</p>
-</a>
+I said x86-64 "historically" uses 4-level paging because recent processors implement [5-level paging](https://en.wikipedia.org/wiki/Intel_5-level_paging). 5-level paging adds another level of indirection as well as 9 more addressing bits to expand the address space to 128 PiB with 57-bit addresses. 5-level paging is supported by operating systems including Linux [since 2017](https://lwn.net/Articles/717293/) as well as recent Windows 10 and 11 server versions.
+
+> **Aside: physical address space limits**
+> 
+> Just as operating systems don't use all 64 bits for virtual addresses, processors don't use entire 64-bit physical addresses. When 4-level paging was the standard, x86-64 CPUs didn't use more than 46 bits, meaning the physical address space was limited to only 64 TiB. With 5-level paging, support has been extended to 52 bits, supporting a 4 PiB physical address space.
+>
+> On the OS level, it's advantageous for the virtual address space to be larger than the physical address space. As Linus Torvalds [said](https://www.realworldtech.com/forum/?threadid=76912&curpostid=76973), "[i]t needs to be bigger, by a factor of _at least_ two, and that's quite frankly pushing it, and you're much better off having a factor of ten or more. Anybody who doesn't get that is a moron. End of discussion."
 
 ### Swapping and Demand Paging
 
 A memory access might fail for a couple reasons: the address might be out of range, it might not be mapped by the page table, or it might have an entry that's marked as not present. In any of these cases, the MMU will trigger a hardware interrupt called a *page fault* to let the kernel handle the problem.
 
 In some cases, the read was truly invalid or prohibited. In these cases, the kernel will probably terminate the program with a [segmentation fault](https://en.wikipedia.org/wiki/Segmentation_fault) error.
-
-> **Aside: segfault ontology**
-> 
-> "Segmentation fault" means different things in different contexts. The MMU triggers a hardware interrupt called a "segmentation fault" when memory is read without permission, but "segmentation fault" is also the name of a signal the OS can send to running programs to terminate them due to any illegal memory access.
 
 <!-- name: Shell session -->
 ```
@@ -705,13 +714,18 @@ Segmentation fault (core dumped)
 $
 ```
 
+> **Aside: segfault ontology**
+> 
+> "Segmentation fault" means different things in different contexts. The MMU triggers a hardware interrupt called a "segmentation fault" when memory is read without permission, but "segmentaxftion fault" is also the name of a signal the OS can send to running programs to terminate them due to any illegal memory access.
+
 In other cases, memory accesses can *intentionally* fail, allowing the OS to populate the memory and then *hand control back to the CPU to try again*. For example, the OS can map a file on disk to virtual memory without actually loading it into RAM, and then lazily load it into physical memory when the address is requested and a page fault occurs. This is called *demand paging*.
 
-[diagram: dialog between mmu/cpu and os demonstrating this lazy loading]
+<!-- big -->
+<img src='images/demand-paging-with-page-faults-comic.png' alt='A three-panel comic style diagram about how demand paging is implemented with hardware interrupts. Panel 1: the CPU having a conversation with the MMU. The CPU says "read 0xfff," the MMU looks confused, and then the MMU sends a lightning to the CPU labeled "page fault!" Panel 2 is labeled "page fault handler" and has a zig-zag outline. It depicts the CPU loading some data into RAM, and then returning from the interrupt. Finally, panel 3 is back to the CPU and MMU conversing. The MMU thinks to itself, "Oh hey, the page is present now." It replies to the CPU&apos;s original request: "Here&apos;s your memory!" The CPU says thank you.' />
 
 For one, this allows for syscalls like [mmap](https://man7.org/linux/man-pages/man2/mmap.2.html) that lazily map entire files from disk to virtual memory to exist. If you're familiar with LLaMa.cpp, a runtime for a leaked Facebook language model, Justine Tunney recently significantly optimized it by [making all the loading logic use mmap](https://justine.lol/mmap/). (If you haven't heard of her before, [check her stuff out](https://justine.lol/)! Cosmopolitan Libc and APE are really cool and might be interesting if you've been enjoying this article.)
 
-> Apparently there's a [lot](https://rentry.org/Jarted) [of](https://news.ycombinator.com/item?id=35413289) [drama](https://news.ycombinator.com/item?id=35458004) about Justine's involvement in this change. Just pointing this out so I don't get screamed at by random internet users. I must confess that I haven't read most of the drama, and everything I said about Justine's stuff being cool is still very true.
+> *Apparently there's a [lot](https://rentry.org/Jarted) [of](https://news.ycombinator.com/item?id=35413289) [drama](https://news.ycombinator.com/item?id=35458004) about Justine's involvement in this change. Just pointing this out so I don't get screamed at by random internet users. I must confess that I haven't read most of the drama, and everything I said about Justine's stuff being cool is still very true.*
 
 Demand paging also enables the technique that you've probably seen under the name "swapping" or "paging." Operating systems can free up physical memory by writing memory pages to disk and then removing them from physical memory but keeping them in virtual memory with the present flag set to 0. If that virtual memory is read, the OS can then restore the memory from disk to RAM and set the present flag back to 1. The OS may have to swap a different section of RAM to make space for the memory being loaded from disk. Disk reads and writes are slow, so operating systems try to make swapping happen as little as possible with [efficient page replacement algorithms](https://en.wikipedia.org/wiki/Page_replacement_algorithm).
 
@@ -719,46 +733,302 @@ A fun hack is to use page table physical memory pointers to store the locations 
 
 ## Part 6: Let's Talk About Forks and Cows
 
-Memory:
-- Physical vs virtual memory. Why virtual memory?
-	- Protections/security - process isolation, kernel isolation
-	- Pages have different levels of protection. On Linux kernel memory is top half but not accessible unless you're in ring 0. macOS doesn't do this, completely separate kernel and user space memory
-	- Optimizations - mmapping, cows, shared libraries
-- Paging
-	- Page tables are in physical memory
-	- Multiple levels. Why? Optimization, it's easy to share table levels between processes. Something something caching?
-	- MMU is a thing that exists, integral part of computer architecture, intervenes
-	- Base of the page table PDBR is set in CR3 register
-	- Paging and virtual memory is a CPU-level thing. Enabled via CR0 register
-- mmap, demand paging, shared libraries are loaded 
+The final question: how did we get here? Where do the first processes come from?
 
-Cows:
-- You might’ve noticed execve replaces the current process rather than creating a new one. So how do you create new processes? Well another syscall called fork which clones the current process.
-- Fork-exec pattern
-- How does cow actually work? Page faults interrupts!
-- Something something kernel memory access in interrupts, init process
-- How do cow and demand paging actually work? Page faults, interrupts, fun fact
-- Let's look at this more practically. All your process are kinda like a tree. They fork-exec down the tree. But the first process can't be fork-execed, bit of a chicken egg problem.
-	- Kernel boot up process
-	- Creation of init process (which fork-execs everything else)
-- Cow. memory paging and structure of this
-- As [comment] says, memory management can be a bitch
-- Malloc allocates in virtual heap space
-- (not here? Stack expands down with demand paging)
+This article is almost done. We're on the final stretch. About to hit a home run. Moving on to greener pastures. And various other terrible idioms that mean you are a single *Length of Part 6* away from touching grass or whatever you do with your time when you aren't reading 15,000 word articles about CPU architecture.
+
+If `execve` starts a new program by replacing the current process, how do you start a new program separately, in a new process? This is a pretty important ability if you want to do multiple things on your computer; when you double-click an app to start it, the app opens separately while the program you were previously on continues running.
+
+The answer is another system call: `fork`, the system call fundamental to all multiprocessing. `fork` is quite simple, actually — it clones the current process and its memory, leaving the saved instruction pointer exactly where it is, and then allows both processes to proceed as usual. Without intervention, the programs continue to run independently from each other and all computation is doubled.
+
+The newly running process is referred to as the "child," with the process originally calling `fork` the "parent." Processes can call `fork` multiple times, thus having multiple children. Each child is numbered with a *process ID* (PID), starting with 1.
+
+Cluelessly doubling the same code is pretty useless, so `fork` returns a different value on the parent vs the child. On the child, it returns the PID of the new process, while on the parent it returns 0. This makes it possible to do different work on the new process so that forking is actually helpful.
+
+<!-- name: main.c -->
+```c
+pid_t pid = fork();
+
+// Code continues from this point as usual, but now across
+// two "identical" processes.
+//
+// Identical... except for the PID returned from fork!
+//
+// This is the only indicator to either program that they
+// are not one of a kind.
+
+if (pid == 0) {
+	// We're in the parent.
+	// Probably continue whatever we were doing before.
+} else {
+	// We're in the child.
+	// Do some computation and feed results to the parent!
+}
+```
+
+Process forking can be a bit hard to wrap your head around. From this point on I will assume you've figured it out; if you have not, check out [this hideous-looking website](https://www.csl.mtu.edu/cs4411.ck/www/NOTES/process/fork/create.html) for a pretty good explainer.
+
+Anyways, Unix programs launch new programs by calling `fork` and then immediately running `execve` in the child process. This is called called the *fork-exec pattern*. When you run a program, your computer executes code similar to the following:
+
+<!-- name: launcher.c -->
+```c
+pid_t pid = fork();
+
+if (pid != 0) {
+	// Immediately replace the child process with the new program.
+	execve(...);
+}
+
+// Since we got here, the process didn't get replaced. We're in the parent!
+// Parent program continues here...
+```
+
+### Mooooo!
+
+You might've noticed that duplicating a process's memory only to immediately discard all of it when loading a different program sounds a bit inefficient. Luckily, we have an MMU. Duplicating data in physical memory is the slow part, not duplicating page tables, so we simply *don't* duplicate any RAM: we create a copy of the old process's page table for the new process and keep the mapping pointing to the same underlying physical memory.
+
+But the child process is supposed to be independent and isolated from the parent! It's not okay for the child to write to the parent's memory, or vice versa!
+
+Introducing *COW* (copy on write) pages. With COW pages, both processes read from the same physical addresses as long they don't attempt to write to the memory. As soon as one of them tries to write to memory, that page is copied in RAM. COW pages allow both processes to have memory isolation without an upfront cost of cloning the entire memory space. This is why the fork-exec pattern is efficient; since none of the old process's memory is written to before loading a new binary, no memory copying is necessary.
+
+COW is implemented, like many fun things, with paging hacks and hardware interrupt handling. After `fork` clones the parent, it flags all of the pages of both processes as read-only. When a program writes to memory, the write fails because the memory is read-only. This triggers a segfault (the hardware interrupt kind) which is handled by the kernel. The kernel which duplicates the memory, updates the page to allow writing, and returns from the interrupt to reattempt the write.
+
+> *A: Knock, knock!  
+> B: Who's there?  
+> A: Interrupting cow.  
+> B: Interrupting cow wh —  
+> A: **MOOOOO!***
+
+### In the Beginning (Not Genesis 1:1)
+
+Every process on your computer was fork-execed by a parent program, except for one: the *init process*. The init process is set up manually, directly by the kernel. It is the first userland program to run and the last to be killed at shutdown.
+
+Want to see a cool instant blackscreen? If you're on macOS or Linux, save your work, open a terminal, and kill the init process (PID 1):
+
+<!-- name: Shell session -->
+```
+$ sudo kill 1
+```
+
+> *Author's note: knowledge about init processes, unfortunately, only applies to Unix-like systems like macOS and Linux. Most of what you learn from now on will not apply to understanding Windows, which has a very different kernel architecture.*
+> 
+> *Just like the section on `execve`, I am explicitly addressing this — I could write another entire article on the NT kernel, but I am holding myself back from doing so. (For now.)*
+
+The init process is responsible for spawning all of the programs and services that make up your operating system. Many of those, in turn, spawn their own services and programs.
+
+<p align='center'>
+	<img src='images/init-process-tree.png' width='580' alt='A tree of processes. The root node is labeled "init." All child nodes are unlabeled but implied to be spawned by the init process.' />
+</p>
+
+Killing the init process kills all of its children and all of their children, shutting down your OS environment.
+
+### Back to the Kernel
+
+We had a lot of fun looking at Linux kernel code back in part 3, so we're gonna do some more of that! This time we'll start with a look at how the kernel starts the init process.
+
+Your computer boots up in a sequence like the following:
+
+1. The motherboard is bundled with a tiny piece of software that searches your connected disks for a program called a *bootloader*. It picks a bootloader, loads its machine code into RAM, and executes it.
+	
+	Keep in mind that we are not yet in the world of a running OS. Until the OS kernel starts the init process, there multiprocessing and syscalls don't really exist. In this context, "executing" a program means directly jumping to its machine code in RAM without expectation of return.
+2. The bootloader is responsible for finding a kernel, loading it into RAM, and executing it. Some bootloaders, like [GRUB](https://www.gnu.org/software/grub/), are configurable and/or let you select between multiple operating systems. BootX and Windows Boot Manager are the built-in bootloaders of macOS and Windows, respectively.
+3. The kernel is now running and begins a large routine of initialization tasks including setting up interrupt handlers, loading drivers, and creating the initial memory mapping. Finally, the kernel switches the privilege level to user mode and starts the init program.
+4. We're finally in userland in an operating system! The init program begins running init scripts, starting services, and executing programs like the shell/UI.
+
+#### Initializing Linux
+
+On Linux, the bulk of step 3 (kernel initialization) occurs in the `start_kernel` function in [init/main.c](https://github.com/torvalds/linux/blob/22b8cc3e78f5448b4c5df00303817a9137cd663f/init/main.c). This function is over 200 lines of calls to various other init functions, so I won't include [the whole thing](https://github.com/torvalds/linux/blob/22b8cc3e78f5448b4c5df00303817a9137cd663f/init/main.c#L880-L1091) in this article, but I do recommend scanning through it! At the end of `start_kernel` a function named `arch_call_rest_init` is called:
+
+[start_kernel @ init/main.c](https://github.com/torvalds/linux/blob/22b8cc3e78f5448b4c5df00303817a9137cd663f/init/main.c#L1087-L1088):
+
+```c
+	/* Do the rest non-__init'ed, we're now alive */
+	arch_call_rest_init();
+```
+
+> **What does non-\_\_init'ed mean?**
+>
+> The `start_kernel` function is defined as `asmlinkage __visible void __init __no_sanitize_address start_kernel(void)`. The weird keywords like `__visible`, `__init`, and `__no_sanitize_address` are all C preprocessor macros used in the Linux kernel to add various code or behaviors to a function.
+> 
+> In this case, `__init` is a macro that instructs the kernel to free the function and its data from memory as soon as the boot process is completed, simply to save space.
+>
+> How does it work? Without getting too deep into the weeds, the Linux kernel is itself packaged as an ELF file. The `__init` macro expands to `__section(".init.text")`, which is a compiler directive to place the code in a section called `.init.text` instead of the usual `.text` section. Other macros allow data and constants to be placed in special init sections as well, such as `__initdata` that expands to `__section(".init.data")`.
+
+`arch_call_rest_init` is nothing but a wrapper function:
+
+[init/main.c](https://github.com/torvalds/linux/blob/22b8cc3e78f5448b4c5df00303817a9137cd663f/init/main.c#L832-L835):
+
+```c
+void __init __weak arch_call_rest_init(void)
+{
+	rest_init();
+}
+```
+
+The comment said "do the rest non-\_\_init'ed" because `rest_init` is not defined with the `__init` macro. This means it is not freed when cleaning up init memory:
+
+[init/main.c](https://github.com/torvalds/linux/blob/22b8cc3e78f5448b4c5df00303817a9137cd663f/init/main.c#L689-L690):
+
+```c
+noinline void __ref rest_init(void)
+{
+```
+
+`rest_init` now creates a thread for the init process:
+
+[rest_init @ init/main.c](https://github.com/torvalds/linux/blob/22b8cc3e78f5448b4c5df00303817a9137cd663f/init/main.c#L695-L700):
+
+```c
+	/*
+	 * We need to spawn init first so that it obtains pid 1, however
+	 * the init task will end up wanting to create kthreads, which, if
+	 * we schedule it before we create kthreadd, will OOPS.
+	 */
+	pid = user_mode_thread(kernel_init, NULL, CLONE_FS);
+```
+
+The `kernel_init` parameter passed to `user_mode_thread` is a function that finishes some initialization tasks and then searches for a valid init program to execute it. This procedure starts with some basic setup tasks; I will skip through these for the most part, except for where `free_initmem` is called. This is where the kernel frees our `.init` sections!
+
+[kernel_init @ init/main.c](https://github.com/torvalds/linux/blob/22b8cc3e78f5448b4c5df00303817a9137cd663f/init/main.c#L1471):
+
+```c
+	free_initmem();
+```
+
+Now the kernel can find a suitable init program to run:
+
+[kernel_init @ init/main.c](https://github.com/torvalds/linux/blob/22b8cc3e78f5448b4c5df00303817a9137cd663f/init/main.c#L1495-L1525):
+
+```c
+	/*
+	 * We try each of these until one succeeds.
+	 *
+	 * The Bourne shell can be used instead of init if we are
+	 * trying to recover a really broken machine.
+	 */
+	if (execute_command) {
+		ret = run_init_process(execute_command);
+		if (!ret)
+			return 0;
+		panic("Requested init %s failed (error %d).",
+		      execute_command, ret);
+	}
+
+	if (CONFIG_DEFAULT_INIT[0] != '\0') {
+		ret = run_init_process(CONFIG_DEFAULT_INIT);
+		if (ret)
+			pr_err("Default init %s failed (error %d)\n",
+			       CONFIG_DEFAULT_INIT, ret);
+		else
+			return 0;
+	}
+
+	if (!try_to_run_init_process("/sbin/init") ||
+	    !try_to_run_init_process("/etc/init") ||
+	    !try_to_run_init_process("/bin/init") ||
+	    !try_to_run_init_process("/bin/sh"))
+		return 0;
+
+	panic("No working init found.  Try passing init= option to kernel. "
+	      "See Linux Documentation/admin-guide/init.rst for guidance.");
+```
+
+On Linux, the init program is almost always located at or symbolic-linked to `/sbin/init`. Common inits include [systemd](https://systemd.io/) (which has an abnormally good website), [OpenRC](https://wiki.gentoo.org/wiki/OpenRC/openrc-init), and [runit](http://smarden.org/runit/). `kernel_init` will default to `/bin/sh` if it can't find anything else — and if it can't find `/bin/sh`, something is TERRIBLY wrong.
+
+*MacOS has an init program, too! It's called launchd and is located at `/sbin/launchd`. Try running that in a terminal to get yelled for not being a kernel.*
+
+From this point on, we're at step 4 in the boot process: the init process is running in userland and begins launching various programs using the fork-exec pattern.
+
+#### Fork Memory Mapping
+
+I was curious how the Linux kernel remaps the bottom half of memory when forking processes, so I poked around a bit. [kernel/fork.c](https://github.com/torvalds/linux/blob/22b8cc3e78f5448b4c5df00303817a9137cd663f/kernel/fork.c) seems to contain most of the code for forking processes. The start of that file helpfully pointed me to the right place to look:
+
+[kernel/fork.c](https://github.com/torvalds/linux/blob/22b8cc3e78f5448b4c5df00303817a9137cd663f/kernel/fork.c#L8-L13):
+
+```c
+/*
+ *  'fork.c' contains the help-routines for the 'fork' system call
+ * (see also entry.S and others).
+ * Fork is rather simple, once you get the hang of it, but the memory
+ * management can be a bitch. See 'mm/memory.c': 'copy_page_range()'
+ */
+```
+
+It looks like this `copy_page_range` function takes some information about a memory mapping and copies the page tables. Quickly skimming through the functions it calls, this is also where pages are set to be read-only to make them COW pages. It checks whether it should do this by calling a function called `is_cow_mapping`.
+
+`is_cow_mapping` is defined back in [include/linux/mm.h](https://github.com/torvalds/linux/blob/22b8cc3e78f5448b4c5df00303817a9137cd663f/include/linux/mm.h), and returns true if the memory mapping has [flags](http://books.gigatux.nl/mirror/kerneldevelopment/0672327201/ch14lev1sec2.html) that indicate the memory is writeable and isn't shared between processes. Shared memory doesn't need to be COWed because it is designed to be shared. Admire the slightly incomprehensible bitmasking:
+
+[include/linux/mm.h](https://github.com/torvalds/linux/blob/22b8cc3e78f5448b4c5df00303817a9137cd663f/include/linux/mm.h#L1541-L1544):
+
+```c
+static inline bool is_cow_mapping(vm_flags_t flags)
+{
+	return (flags & (VM_SHARED | VM_MAYWRITE)) == VM_MAYWRITE;
+}
+```
+
+Back in [kernel/fork.c](https://github.com/torvalds/linux/blob/22b8cc3e78f5448b4c5df00303817a9137cd663f/kernel/fork.c), doing a simple Command-F for `copy_page_range` yields one call from the `dup_mmap` function... which is in turn called by `dup_mm`... which is called by `copy_mm`... which is finally called by the massive `copy_process` function! `copy_process` is the core of the fork function, and, in a way, the centerpoint of how Unix systems execute programs — always copying and editing a template created for the first process at startup.
+
+### In Summary...
+
+***So... how do programs run?***
+
+On the lowest level: processors are dumb. They have a pointer into memory and execute instructions in a row, unless they reach an instruction that tells them to jump somewhere else.
+
+Besides jump instructions, hardware and software interrupts can also break the sequence of execution by jumping to a preset location that can then choose where to jump to. Processor cores can't run multiple programs at once, but this can be simulated by using a timer to repeatedly trigger interrupts and allowing kernel code to switch between different code pointers.
+
+Programs are *tricked* into believing they're running as a coherent, isolated unit. Direct access to system resources is prevented in user mode, memory space is isolated using paging, and system calls are designed to allow generic I/O access without too much knowledge about the true execution context. System calls are instructions that ask the CPU to run some kernel code, the location of which is configured by the kernel at startup.
+
+***But... how do programs run?***
+
+After the computer starts up, the kernel launches the init process. This is the first program running at the higher level of abstraction where its machine code doesn't have to worry about many specific system details. The init program launches the programs that render your computer's graphical environment and are responsible for launching other software.
+
+To launch a program, it clones itself with the fork syscall. This cloning is efficient because all of the memory pages are COW and the memory doesn't need to be copied within physical RAM. On Linux, this is the `copy_process` function in action.
+
+Both processes check if they're the forked process. If they are, they use an exec syscall to ask the kernel to replace the current process with a new program.
+
+The new program is probably an ELF file, which the kernel parses to find information on how to load the program and where to place its code and data within the new virtual memory mapping. The kernel might also prepare an ELF interpreter if the program is dynamically linked.
+
+The kernel can then load the program's virtual memory mapping and return to userland with the program running, which really means setting the CPU's instruction pointer to the start of the new program's code in virtual memory.
 
 ## Part 7: Epilogue
 
-- This is all happening, not just "legacy" relics!
-- ChatGPT 3 and GPT-4 acknowledgement, also Warp AI
-- Funny implications of unix is not meant to be shut down
-- Two Rings to Rule Them All
-- Most Linux users probably have a sufficiently interesting life that they spend little time imagining how page tables are represented in the kernel. -https://lwn.net/Articles/106177/
-- The only problem is that some hardware actually supports four-level tables. The example which is driving the current changes is x86-64. The current x86-64 port emulates a three-level architecture by using a single, shared, top-level directory ("PML4") and fitting (most of) the virtual address space in a three-level tree pointed to by a single PML4 entry. It all works, but it limits Linux processes to a mere 512GB of virtual address space. Such limits are irksome to the kernel developers when the hardware can do more, and, besides, somebody is likely to release a web browser or office suite which runs into that limit in the near future.
-- Credits:
-	- My parents
-	- Nicky Case
-	- Pradyun
-	- Spencer Pogorzelski
-	- https://github.com/ma1ted/
-	- https://github.com/polypixeldev
-- diagrams on figma!
+Congratulations! We have now firmly placed the "you" in CPU. I hope you had fun.
+
+I will send you off by emphasizing once more that all the knowledge you just gained is real and active. The next time you think about how your computer is running multiple apps, I hope you envision timer chips and hardware interrupts. When you write a program in some fancy programming language and get a linker error, I hope you think about what that linker is trying to do.
+
+If you have any questions (or corrections) about anything contained in this article, you can feel free to personally email me at [hi@kognise.dev](mailto:hi@kognise.dev) and I will respond.
+
+<img src='images/cpu-pleading-face-separator.png' alt='A section separator image of a CPU with an adorable pleading face.' />
+
+I talked to GPT-3.5 and GPT-4 a decent amount while writing this article. While they lied to me a lot and most of the information was useless, they were sometimes very helpful for working through problems. LLM assistance can be net positive if you're aware of the limitations and are extremely skeptical of everything they say. That said, they're terrible at writing. Don't let them write for you.
+
+More importantly, thank you to all the humans who proofread me, encouraged me, and helped me brainstorm — especially B, Ben, Caleb, Kara, polypixeldev, Pradyun, Spencer, Nicky (who drew the wonderful elf in part 4), and my lovely parents.
+
+If you are a teenager and you like computers and you are not already in the [Hack Club Slack](https://hackclub.com/slack), you should join right now. I would not have written this article if I didn't have a community of awesome people to share my thoughts and progress with. If you are not a teenager, you should [give us money](https://hackclub.com/philanthropy/) so we can keep doing cool things.
+
+All of the mediocre art in this article was drawn in [Figma](https://figma.com/). I used [Obsidian](https://obsidian.md/) for editing, and sometimes [Vale](https://vale.sh/) for linting. The Markdown source for this article is [available on GitHub](https://github.com/hackclub/putting-the-you-in-cpu/) and open to future nitpicks, and all art is published on a [Figma community page](https://www.figma.com/community/file/1260699047973407903).
+
+### Bonus: Translating C Concepts
+
+If you've done some low-level programming yourself, you probably know what a stack and heap are and you've probably used `malloc`. You might not have thought a lot about how they're implemented!
+
+First of all, a thread's stack is a fixed amount of memory that's mapped somewhere high up in virtual memory. The stack pointer starts at the top of the stack memory and moves downward as it increments. Physical memory is not allocated up front for the entire mapped stack space; instead, demand paging is used to lazily allocate memory as frames of the stack are reached.
+
+It might be surprising to hear that heap allocation functions like `malloc` are not system calls. Instead, heap memory management is provided by the libc implementation! `malloc`, `free`, et al are complex procedures, and the libc keeps track of memory mapping details itself. Under the hood, the userland heap allocator uses syscalls including `mmap` (which can map more than just files) and `sbrk`.
+
+### Bonus: Tidbits
+
+I couldn't find anywhere coherent to put these, but found them amusing, so here you go.
+
+> *Most Linux users probably have a sufficiently interesting life that they spend little time imagining how page tables are represented in the kernel.*
+> 
+> *<cite>[Jonathan Corbet, LWN](https://lwn.net/Articles/106177/)</cite>*
+
+An alternate visualization of hardware interrupts:
+
+<img src='images/hardware-interrupt-meme.png' width='350' alt='A 4-panel meme comic depicting a small bird on a branch, with speech bubbles containing assembly instructions. In the second panel, another speech bubble appears from out of frame, shouting "hello it&apos;s me the keyboard!" In the third panel, the source of the shouting is visible as a large crow in frame, now shouting "I have an important message!" In the final frame, a close up on the small bird looking unamused. Another speech bubble from the crow out of frame bears simply the letter E.' />
+
+A note that some system calls use a technique called vDSOs instead of jumping into kernel space. I didn't have time to talk about this, but it's quite interesting and I recommend [reading](https://en.wikipedia.org/wiki/VDSO) [into](https://man7.org/linux/man-pages/man7/vdso.7.html) [it](https://0xax.gitbooks.io/linux-insides/content/SysCall/linux-syscall-3.html).
+
+And finally, addressing the Unix allegations: I do feel bad that a lot of the execution-specific stuff is very Unix-specific. If you're a macOS or Linux user this is fine, but it won't bring you too much closer to how Windows executes programs or handles system calls, although the CPU architecture stuff is all the same. In the future I would love to write an article that covers the Windows world.
