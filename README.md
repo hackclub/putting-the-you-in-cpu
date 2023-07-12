@@ -11,7 +11,7 @@ I finally cracked and decided to go all-in on figuring out as much as possible. 
 
 And you know what they say... you only truly understand something if you can explain it to someone else.
 
-> Feel like you know this stuff already? Read [part 3](#part-3-how-to-run-a-program) and I *guarantee* you will learn at least one new interesting technical detail. Unless you're like, Linus Torvalds, or a kernel developer who's worked heavily on exec syscalls.
+> In a hurry? Feel like you know this stuff already? Read [part 3](#part-3-how-to-run-a-program) and I *guarantee* you will learn at least one new interesting technical detail. Unless you're like, Linus Torvalds, or a kernel developer who's worked heavily on exec syscalls.
 
 ## Part 1: The "Basics"
 
