@@ -125,6 +125,12 @@ tab-size: 8
 ---
 
 import CodeBlock from '../../components/CodeBlock.astro'
+
+*This is my personal web edition of an article I wrote as a [Hack Club Project](https://github.com/hackclub/putting-the-you-in-cpu/).*
+
+*This edition has slightly better formatting than the original on GitHub, especially for code blocks, but otherwise contains the same content.*
+
+---
 `.trim() + '\n\n' + text
 
 // Write the file.
