@@ -1,3 +1,14 @@
+@font-face {
+	font-family: 'Phantom Sans';
+	src: url('https://assets.hackclub.com/fonts/Phantom_Sans_0.7/SemiBold.woff')
+		format('woff'),
+		url('https://assets.hackclub.com/fonts/Phantom_Sans_0.7/SemiBold.woff2')
+		format('woff2');
+	font-weight: 600;
+	font-style: normal;
+	font-display: swap;
+}
+
 html {
 	background: #212529;
 }
@@ -43,7 +54,7 @@ header {
 	color: #ced4da;
 
 	& h1 {
-		font-family: 'Phantom Sans 0.8', 'IBM Plex Serif', serif;
+		font-family: 'Phantom Sans', 'IBM Plex Serif', serif;
 		font-size: 2.5em;
 		font-weight: 600;
 		margin: 0;
