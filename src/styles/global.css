@@ -136,9 +136,10 @@ hr {
 	font-size: 0.9em;
 	text-align: center;
 	color: #adb5bd;
+	line-height: 1.5;
 
 	& p {
-		margin: 0;
+		margin: 6px 0;
 	}
 
 	& p:not(:first-child) {
