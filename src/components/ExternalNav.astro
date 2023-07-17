@@ -18,9 +18,11 @@ const currentChapter = await getEntryBySlug('chapters', currentChapterSlug)
 					class={`
 						${chapter.slug === currentChapterSlug ? 'active' : ''}
 						${Math.abs(
-							// Only show 5 on mobile.
 							index - Math.max(Math.min(currentChapter.data.chapter, allChapters.length - 3), 2)
-						) > 2 ? 'mobile-hide' : ''}
+						) > 2 ? 'md-hide' : ''}
+						${Math.abs(
+							index - Math.max(Math.min(currentChapter.data.chapter, allChapters.length - 2), 1)
+						) > 1 ? 'sm-hide' : ''}
 					`}
 					style={`opacity: ${[0.7, 0.5, 0.4, 0.3][Math.abs(index - currentChapter.data.chapter)] ?? 0.2}`}
 				>
@@ -41,25 +43,17 @@ const currentChapter = await getEntryBySlug('chapters', currentChapterSlug)
 	if (noScript) window.__CPU_EXTERNAL_NAV_NOSCRIPT__ = true
 </script>
 <script>
-	/* @ts-ignore-line */
-	if (!window.__CPU_EXTERNAL_NAV_NOSCRIPT__) {
-		// External nav hide on scroll effect
-		const externalNav: HTMLElement = document.querySelector('#external-nav')
+	// External nav hide on scroll effect
+	const externalNav: HTMLElement = document.querySelector('#external-nav')
 
-		let scroller = document.querySelector('main')
-		let scrollerListener: Window | HTMLElement = scroller
-		if (scroller.scrollHeight === scroller.clientHeight) {
-			scroller = document.documentElement
-			scrollerListener = window
-		}
+	const showThreshold = 80
+	const hideThreshold = 80
+	let visible = true
 
-		const showThreshold = 80
-		const hideThreshold = 80
-
-		let visible = true
+	function addNavScrollHider(scroller: HTMLElement, eventSource: Window | HTMLElement = scroller) {
 		let farthestPoint = scroller.scrollTop
 
-		scrollerListener.addEventListener('scroll', () => {
+		eventSource.addEventListener('scroll', () => {
 			if (visible) {
 				farthestPoint = Math.min(farthestPoint, scroller.scrollTop)
 
@@ -82,5 +76,12 @@ const currentChapter = await getEntryBySlug('chapters', currentChapterSlug)
 				}
 			}
 		}, { passive: true })
+	}
+
+	/* @ts-ignore-line */
+	if (!window.__CPU_EXTERNAL_NAV_NOSCRIPT__) {
+		// We need multiple for resilience with responsive changes to overflowing elements.
+		addNavScrollHider(document.querySelector('main'))
+		addNavScrollHider(document.documentElement, window)
 	}
 </script>

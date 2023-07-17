@@ -98,7 +98,7 @@ h1 {
 	& .chapter {
 		font-weight: normal;
 		color: #495057;
-		margin-bottom: -2px;
+		margin-bottom: 2px;
 	}
 
 	& .title {
@@ -118,21 +118,26 @@ h1 {
 	line-height: 1.7;
 	font-size: 0.95em;
 
-	& ol, & p {
+	& p {
 		margin: 5px 0;
 	}
 
 	& p {
 		font-style: italic;
 	}
+}
 
-	& a {
-		--color: #000000;
-		--hover-background: #ced4da;
+@media (max-width: 720px) {
+	:root {
+		--toc-width: 0;
 	}
 
-	& .active {
-		font-weight: bold;
+	nav.internal {
+		display: none;
+	}
+
+	html, body, main {
+		overflow: unset;
 	}
 }
 

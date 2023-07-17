@@ -1,0 +1,30 @@
+---
+import { getCollection, CollectionEntry } from 'astro:content'
+
+export interface Props {
+	chapterSlug: CollectionEntry<'chapters'>['slug']
+}
+
+const { chapterSlug } = Astro.props
+const allChapters = await getCollection('chapters')
+---
+
+<details class='old-nav'>
+	<summary>All Chapters</summary>
+
+	<ol start='0'>
+		<li>
+			<a href='/'>Intro</a>
+		</li>
+		{allChapters
+			.filter(chapter => chapter.data.chapter !== 0) // Skip the intro
+			.map(otherChapter => (
+				<li class={otherChapter.slug === chapterSlug ? 'active' : ''}>
+					<a href={otherChapter.slug} aria-current={otherChapter.slug === chapterSlug ? 'page' : undefined}>
+						{otherChapter.data.title}
+					</a>
+				</li>
+			))
+		}
+	</ol>
+</details>
