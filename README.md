@@ -20,4 +20,6 @@ And you know what they say... you only truly understand something if you can exp
 >
 > [Read chapter 3](/how-to-run-a-program) and I guarantee you will learn something new. Unless you're like, Linus Torvalds himself.
 
+<br>
+
 <p align='center'><a href='https://cpu.land/the-basics'><strong>Continue to Chapter 1: The "Basics" &raquo;</strong><br>(cpu.land)</a></p>
