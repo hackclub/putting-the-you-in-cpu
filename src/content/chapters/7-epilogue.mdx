@@ -1,0 +1,53 @@
+---
+chapter: 7
+title: Epilogue
+shortname: Epilogue
+slug: epilogue
+updatedAt: 2023-07-17T17:16:18.079Z
+---
+
+Congratulations! We have now firmly placed the "you" in CPU. I hope you had fun.
+
+I will send you off by emphasizing once more that all the knowledge you just gained is real and active. The next time you think about how your computer is running multiple apps, I hope you envision timer chips and hardware interrupts. When you write a program in some fancy programming language and get a linker error, I hope you think about what that linker is trying to do.
+
+If you have any questions (or corrections) about anything contained in this article, you should email me at [lexi@hackclub.com](mailto:lexi@hackclub.com) or submit an issue or PR [on GitHub](https://github.com/hackclub/putting-the-you-in-cpu/).
+
+{/* <img src='/images/cpu-pleading-face-separator.png' loading='lazy' alt='A section separator image of a CPU with an adorable pleading face.' width='1800' height='516' /> */}
+
+<img src='/images/the-end.png' loading='lazy' alt='The end.' width='1367' height='331' style='max-width: 600px; margin: 30px auto; margin-bottom: 150px;' />
+
+... but wait, there's more!
+
+## Bonus: Translating C Concepts
+
+If you've done some low-level programming yourself, you probably know what a stack and heap are and you've probably used `malloc`. You might not have thought a lot about how they're implemented!
+
+First of all, a thread's stack is a fixed amount of memory that's mapped somewhere high up in virtual memory. The stack pointer starts at the top of the stack memory and moves downward as it increments. Physical memory is not allocated up front for the entire mapped stack space; instead, demand paging is used to lazily allocate memory as frames of the stack are reached.
+
+It might be surprising to hear that heap allocation functions like `malloc` are not system calls. Instead, heap memory management is provided by the libc implementation! `malloc`, `free`, et al are complex procedures, and the libc keeps track of memory mapping details itself. Under the hood, the userland heap allocator uses syscalls including `mmap` (which can map more than just files) and `sbrk`.
+
+## Bonus: Tidbits
+
+I couldn't find anywhere coherent to put these, but found them amusing, so here you go.
+
+> *Most Linux users probably have a sufficiently interesting life that they spend little time imagining how page tables are represented in the kernel.*
+> 
+> *<cite>[Jonathan Corbet, LWN](https://lwn.net/Articles/106177/)</cite>*
+
+An alternate visualization of hardware interrupts:
+
+<img src='/images/hardware-interrupt-meme.png' loading='lazy' style='max-width: 350px;' alt='A 4-panel meme comic depicting a small bird on a branch, with speech bubbles containing assembly instructions. In the second panel, another speech bubble appears from out of frame, shouting "hello it&apos;s me the keyboard!" In the third panel, the source of the shouting is visible as a large crow in frame, now shouting "I have an important message!" In the final frame, a close up on the small bird looking unamused. Another speech bubble from the crow out of frame bears simply the letter E.' width='600' height='625' />
+
+A note that some system calls use a technique called vDSOs instead of jumping into kernel space. I didn't have time to talk about this, but it's quite interesting and I recommend [reading](https://en.wikipedia.org/wiki/VDSO) [into](https://man7.org/linux/man-pages/man7/vdso.7.html) [it](https://0xax.gitbooks.io/linux-insides/content/SysCall/linux-syscall-3.html).
+
+And finally, addressing the Unix allegations: I do feel bad that a lot of the execution-specific stuff is very Unix-specific. If you're a macOS or Linux user this is fine, but it won't bring you too much closer to how Windows executes programs or handles system calls, although the CPU architecture stuff is all the same. In the future I would love to write an article that covers the Windows world.
+
+## Acknowledgements
+
+I talked to GPT-3.5 and GPT-4 a decent amount while writing this article. While they lied to me a lot and most of the information was useless, they were sometimes very helpful for working through problems. LLM assistance can be net positive if you're aware of the limitations and are extremely skeptical of everything they say. That said, they're terrible at writing. Don't let them write for you.
+
+More importantly, thank you to all the humans who proofread me, encouraged me, and helped me brainstorm — especially Ani, B, Ben, Caleb, Kara, polypixeldev, Pradyun, Spencer, Nicky (who drew the wonderful elf in [chapter 4](/becoming-an-elf-lord)), and my lovely parents.
+
+If you are a teenager and you like computers and you are not already in the [Hack Club Slack](https://hackclub.com/slack), you should join right now. I would not have written this article if I didn't have a community of awesome people to share my thoughts and progress with. If you are not a teenager, you should [give us money](https://hackclub.com/philanthropy/) so we can keep doing cool things.
+
+All of the mediocre art in this article was drawn in [Figma](https://figma.com/). I used [Obsidian](https://obsidian.md/) for editing, and sometimes [Vale](https://vale.sh/) for linting. The Markdown source for this article is [available on GitHub](https://github.com/hackclub/putting-the-you-in-cpu/) and open to future nitpicks, and all art is published on a [Figma community page](https://www.figma.com/community/file/1260699047973407903).

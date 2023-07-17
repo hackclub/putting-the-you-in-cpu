@@ -1,0 +1,169 @@
+---
+import '../styles/global.css'
+import '../styles/chapter.css'
+
+import { CollectionEntry, getCollection, getEntryBySlug } from 'astro:content'
+import TOCList from '../components/TOCList.astro'
+import SEO from '../components/SEO.astro'
+import ExternalNav from '../components/ExternalNav.astro'
+import ColoredTitle from '../components/ColoredTitle.astro'
+import EditButton from '../components/EditButton.astro'
+
+export interface Params {
+	slug: CollectionEntry<'chapters'>['slug']
+}
+
+const chapter = await getEntryBySlug('chapters', Astro.params.slug)
+const { Content, headings } = await chapter.render()
+
+const allChapters = await getCollection('chapters')
+const prevChapter = allChapters
+	.find(otherChapter => otherChapter.data.chapter === chapter.data.chapter - 1)
+const nextChapter = allChapters
+	.find(otherChapter => otherChapter.data.chapter === chapter.data.chapter + 1)
+
+export async function getStaticPaths() {
+	const chapters = await getCollection('chapters')
+	return chapters
+		.filter(chapter => chapter.data.chapter !== 0) // Skip the intro
+		.map(chapter => ({ params: { slug: chapter.slug } }))
+}
+---
+
+<html lang='en'>
+<head>
+	<meta charset='utf-8' />
+	<meta name='viewport' content='width=device-width, initial-scale=1' />
+
+	<link rel='preconnect' href='https://fonts.googleapis.com' />
+	<link rel='preconnect' href='https://fonts.gstatic.com' crossorigin />
+	<link href='https://fonts.googleapis.com/css2?family=IBM+Plex+Mono&family=IBM+Plex+Sans:wght@400;700&family=IBM+Plex+Serif:ital,wght@0,400;0,700;1,400;1,700&display=swap' rel='stylesheet' />
+
+	<SEO chapterSlug={chapter.slug} />
+</head>
+<body>
+	<ExternalNav currentChapterSlug={chapter.slug} />
+
+	<nav class='internal'>
+		<h2>Chapter Contents</h2>
+		
+		<TOCList headings={[
+			{ depth: 2, text: 'Intro', slug: 'intro' },
+			...headings
+		]} />
+
+		<div class='navigation'>
+			{prevChapter ? (
+				<a href={prevChapter.data.chapter === 0 ? '/' : prevChapter.slug}>
+					<span aria-hidden='true'>&laquo;</span>
+					<span class='sr-only'>Previous:</span>
+					{prevChapter.data.chapter === 0 ? 'Intro' : `Chapter ${prevChapter.data.chapter}`}
+				</a>
+			) : null}
+			{nextChapter ? (
+				<a href={nextChapter.slug}>
+					<span class='sr-only'>Next:</span>
+					{nextChapter.data.chapter === 0 ? 'Intro' : `Chapter ${nextChapter.data.chapter}`}
+					<span aria-hidden='true'>&raquo;</span>
+				</a>
+			) : null}
+		</div>
+	</nav>
+
+	<main>
+		<header class='content'>
+			<h1 id='intro'>
+				<div class='chapter'>Chapter {chapter.data.chapter}<span class='sr-only'>:</span></div>
+				<div class='title'>
+					{chapter.data.title}
+					<EditButton chapterSlug='intro' />
+				</div>
+			</h1>
+		</header>
+
+		<div class='you-are-here'>
+			<div class='content'>
+				<p>Part of <a href='/' style='--color: transparent;'><ColoredTitle /></a>: a rabbit hole into how your computer runs programs.</p>
+
+				<details class='old-nav'>
+					<summary>All Chapters</summary>
+
+					<ol start='0'>
+						<li>
+							<a href='/'>Intro</a>
+						</li>
+						{allChapters
+							.filter(chapter => chapter.data.chapter !== 0) // Skip the intro
+							.map(otherChapter => (
+								<li class={otherChapter.slug === chapter.slug ? 'active' : ''}>
+									<a href={otherChapter.slug}>{otherChapter.data.title}</a>
+								</li>
+							))
+						}
+					</ol>
+				</details>
+			</div>
+		</div>
+
+		<div class='content'>
+			<Content />
+
+			{nextChapter ? (
+				<a class='continue' href={nextChapter.slug}>
+					Continue to Chapter {nextChapter.data.chapter}: {nextChapter.data.title} <span aria-hidden='true'>&raquo;</span>
+				</a>
+			) : null}
+		</div>
+
+		<div class='scroll-padding' />
+	</main>
+
+	<script define:vars={{ dev: import.meta.env.DEV }}>
+		window.__ASTRO_DEV_MODE__ = dev
+	</script>
+	<script>
+		const scrollRestoreKey = `scroll-restore-${window.location.pathname}`
+
+		// Scrollspy
+		const leeway = 80
+		const container = document.querySelector('main')
+		const headings = [ ...document.querySelectorAll('h1, h2, h3, h4, h5, h6') ]
+			.filter(el => !!el.id)
+		headings.reverse()
+
+		let current = 'intro'
+		const updateScrollspy = () => {
+			for (const el of document.querySelectorAll('[data-scrollspy]')) {
+				el.classList.toggle('scrollspy-active', el.dataset.scrollspy === current)
+			}
+		}
+		
+		container.addEventListener('scroll', () => {
+			let next = 'intro'
+			for (const heading of headings) {
+				if (container.scrollTop >= heading.offsetTop - leeway) {
+					next = heading.id
+					break
+				}
+			}
+			if (next !== current) {
+				current = next
+				updateScrollspy()
+			}
+
+			if (window.__ASTRO_DEV_MODE__) {
+				sessionStorage.setItem(scrollRestoreKey, container.scrollTop.toString())
+			}
+		}, { passive: true })
+
+		updateScrollspy()
+
+		// Restore scroll for live reloading
+		setTimeout(() => {
+			if (window.__ASTRO_DEV_MODE__ && sessionStorage.getItem(scrollRestoreKey)) {
+				container.scrollTop = parseInt(sessionStorage.getItem(scrollRestoreKey))
+			}
+		}, 0)
+	</script>
+</body>
+</html>

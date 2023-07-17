@@ -1,0 +1,23 @@
+{
+	"name": "putting-the-you-in-cpu",
+	"version": "0.0.1",
+	"private": true,
+	"license": "MIT",
+	"scripts": {
+		"dev": "astro dev",
+		"build": "astro build",
+		"preview": "astro preview"
+	},
+	"devDependencies": {
+		"@astrojs/mdx": "^0.18.2",
+		"@astrojs/sitemap": "^1.2.1",
+		"@astrojs/vercel": "^3.2.1",
+		"astro": "^2.1.8",
+		"postcss-nesting": "^11.2.2",
+		"rehype-external-links": "^2.0.1",
+		"rehype-preset-minify": "^6.0.0"
+	},
+	"dependencies": {
+		"shiki": "^0.14.2"
+	}
+}

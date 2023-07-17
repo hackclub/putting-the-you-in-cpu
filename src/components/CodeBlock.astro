@@ -1,0 +1,95 @@
+---
+import theme from 'shiki/themes/one-dark-pro.json'
+
+interface Props {
+	name?: string
+	startLine?: number
+	sourceUrl?: string
+}
+
+const { name, sourceUrl, startLine } = Astro.props
+
+const slot = await Astro.slots.render('default')
+const lineCount = slot.match(/class="line"/g).length
+
+const background = theme.colors['editor.background']
+const foreground = theme.colors['editor.foreground']
+const lineNumbers = theme.colors['editorLineNumber.foreground']
+---
+
+<figure class='code-block'>
+	{name ? (
+		<figcaption>
+			{sourceUrl ? (
+				<a href={sourceUrl} target='_blank' rel='noopener noreferrer'>
+					{name}
+				</a>
+			) : name}
+		</figcaption>
+	) : null}
+
+	<div class='pre-container'>
+		{startLine ? (
+			<pre class='line-numbers' aria-hidden='true'><code>{
+				new Array(lineCount).fill(0).map((_, i) => i + startLine).join('\n')
+			}</code></pre>
+		) : null}
+
+		<Fragment set:html={slot} />
+	</div>
+</figure>
+
+<style define:vars={{ background, foreground, lineNumbers }}>
+	figure {
+		background: var(--background);
+		padding: 8px 16px;
+		border-radius: 4px;
+	}
+
+	figcaption {
+		font-size: 0.9em;
+		color: var(--foreground);
+		font-family: 'IBM Plex Sans', sans-serif;
+
+		& a {
+			text-decoration: dotted underline;
+			text-underline-offset: 4px;
+		}
+
+		& a, & a:hover, & a:not([href^=\#]):visited, & a:not([href^=\#]):visited:hover {
+			color: inherit;
+			background: none;
+		}
+
+		& a::before, & a::after {
+			content: none;
+			display: none;
+		}
+	}
+
+	.pre-container {
+		padding: 10px 0;
+		display: flex;
+		flex-direction: row;
+		gap: 16px;
+		overflow-x: auto;
+		background: var(--background); /* <- needed so scrollbar is right theme */
+	}
+
+	figure :global(pre) {
+		line-height: 1.5;
+		margin: 0;
+		padding: 0;
+		overflow-x: visible !important;
+	}
+
+	.line-numbers {
+		color: var(--lineNumbers);
+		text-align: right;
+		user-select: none;
+	}
+
+	figure :global(pre):not(.line-numbers) {
+		flex: 1;
+	}
+</style>

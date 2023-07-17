@@ -1,0 +1,15 @@
+---
+import { getEntryBySlug } from 'astro:content'
+
+export interface Props {
+	chapterSlug: string
+}
+
+const { chapterSlug } = Astro.props
+const chapter = await getEntryBySlug('chapters', chapterSlug)
+
+const url = 'https://github.com/hackclub/putting-the-you-in-cpu/tree/main/src/content/chapters/'
+	+ chapter.data.chapter + '-' + chapterSlug + '.mdx'
+---
+
+<a class='edit-button' href={url} target='_blank'>Edit on GitHub</a>

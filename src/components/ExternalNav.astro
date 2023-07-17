@@ -1,0 +1,86 @@
+---
+import { getCollection, getEntryBySlug, CollectionEntry} from 'astro:content'
+
+export interface Props {
+	currentChapterSlug: CollectionEntry<'chapters'>['slug']
+	noScript?: boolean
+}
+
+const { currentChapterSlug, noScript } = Astro.props
+const allChapters = await getCollection('chapters')
+const currentChapter = await getEntryBySlug('chapters', currentChapterSlug)
+---
+
+<nav class='external' id='external-nav' aria-label='Navigate Between Chapters'>
+	<ul>
+		{allChapters.map((chapter, index) => (
+				<li
+					class={`
+						${chapter.slug === currentChapterSlug ? 'active' : ''}
+						${Math.abs(
+							// Only show 5 on mobile.
+							index - Math.max(Math.min(currentChapter.data.chapter, allChapters.length - 3), 2)
+						) > 2 ? 'mobile-hide' : ''}
+					`}
+					style={`opacity: ${[0.7, 0.5, 0.4, 0.3][Math.abs(index - currentChapter.data.chapter)] ?? 0.2}`}
+				>
+					<a
+						href={chapter.data.chapter === 0 ? '/' : chapter.slug}
+						aria-current={chapter.slug === currentChapterSlug ? 'page' : undefined}
+					>
+						<div class='chapter'>Ch. {chapter.data.chapter}</div>
+						<div class='title'>{chapter.data.shortname}</div>
+					</a>
+				</li>
+			))
+		}
+	</ul>
+</nav>
+
+<script define:vars={{ noScript }}>
+	if (noScript) window.__CPU_EXTERNAL_NAV_NOSCRIPT__ = true
+</script>
+<script>
+	/* @ts-ignore-line */
+	if (!window.__CPU_EXTERNAL_NAV_NOSCRIPT__) {
+		// External nav hide on scroll effect
+		const externalNav: HTMLElement = document.querySelector('#external-nav')
+
+		let scroller = document.querySelector('main')
+		let scrollerListener: Window | HTMLElement = scroller
+		if (scroller.scrollHeight === scroller.clientHeight) {
+			scroller = document.documentElement
+			scrollerListener = window
+		}
+
+		const showThreshold = 80
+		const hideThreshold = 80
+
+		let visible = true
+		let farthestPoint = scroller.scrollTop
+
+		scrollerListener.addEventListener('scroll', () => {
+			if (visible) {
+				farthestPoint = Math.min(farthestPoint, scroller.scrollTop)
+
+				if (scroller.scrollTop - farthestPoint > hideThreshold) {
+					// We scrolled down.
+					console.log('Hiding external nav')
+					farthestPoint = scroller.scrollTop
+					externalNav.style.transform = `translateY(-100%)`
+					visible = false
+				}
+			} else if (!visible) {
+				farthestPoint = Math.max(farthestPoint, scroller.scrollTop)
+
+				if (scroller.scrollTop - farthestPoint < -showThreshold) {
+					// We scrolled up.
+					console.log('Showing external nav')
+					farthestPoint = scroller.scrollTop
+					externalNav.style.transform = `translateY(0)`
+					visible = true
+				}
+			}
+		}, { passive: true })
+	}
+</script>

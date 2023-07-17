@@ -1,0 +1,13 @@
+---
+export interface Props {
+	onDark?: boolean
+}
+
+const { onDark } = Astro.props
+---
+
+<span style={`color: ${onDark ? '#fa5252' : '#e03131'}`}>Putting</span>{' '}
+<span style={`color: ${onDark ? '#fab005' : '#f59f00'}`}>the</span>{' '}
+<span style={`color: ${onDark ? '#40c057' : '#2f9e44'}`}>&ldquo;You&rdquo;</span>{' '}
+<span style={`color: ${onDark ? '#228be6' : '#1971c2'}`}>in</span>{' '}
+<span style={`color: ${onDark ? '#be4bdb' : '#9c36b5'}`}>CPU</span>

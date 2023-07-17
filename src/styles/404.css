@@ -1,0 +1,46 @@
+html {
+	background: #000000;
+	color: #00ff00;
+}
+
+main {
+	font-family: var(--font-mono);
+	font-size: 1.1rem;
+	text-align: left;
+	padding: 60px;
+	line-height: 2.2;
+}
+
+h1 {
+	font-weight: bold;
+	font-size: inherit;
+}
+
+a {
+	--color: currentColor;
+	--hover-background: #004800;
+	text-underline-offset: 6px;
+	text-decoration: underline;
+}
+
+h1, p {
+	margin: 0;
+	line-height: inherit;
+}
+
+@media (max-width: 600px) {
+	main {
+		padding: 30px 30px;
+		font-size: 0.9rem;
+	}
+
+	h1, p {
+		margin: 16px 0;
+	}
+}
+
+@media (max-width: 400px) {
+	main {
+		font-size: 0.8rem;
+	}
+}

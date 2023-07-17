@@ -1,0 +1,87 @@
+---
+import { getEntryBySlug, CollectionEntry } from 'astro:content'
+
+interface Props {
+	chapterSlug: CollectionEntry<'chapters'>['slug']
+}
+
+const { chapterSlug } = Astro.props
+const chapter = await getEntryBySlug('chapters', chapterSlug)
+
+const bannerUrl = new URL('/banner.png', Astro.site)
+const bannerAlt = ''
+const bannerWidth = 1280
+const bannerHeight = 640
+
+const description = ''
+
+const canonicalUrl = new URL(Astro.url.pathname, Astro.site)
+const publishedAt = new Date(2023, 6, 17)
+const articleTitle = 'Putting the "You" in CPU'
+const keywords = [ 'unix', 'linux', 'mmu', 'paging', 'memory management', 'cpu', 'program execution', 'elf', 'elf format', 'timeslicing', 'fork', 'cow' ]
+---
+
+<title>{`${chapter.data.title} | ${articleTitle}`}</title>
+<meta property='og:title' content={chapter.data.chapter === 0 ? articleTitle : chapter.data.title} />
+<meta property='og:site_name' content={articleTitle} />
+
+<meta name='description' content={description} />
+<meta property='og:description' content={description}>
+
+<meta property='og:url' content={canonicalUrl} />
+<link rel='canonical' href={canonicalUrl} />
+
+<meta property='og:image' content={bannerUrl} />
+<meta property='og:image:alt' content={bannerAlt} />
+<meta property='og:image:width' content={bannerWidth.toString()} />
+<meta property='og:image:height' content={bannerHeight.toString()} />
+
+<meta name='robots' content='index,follow' />
+<meta name='googlebot' content='index,follow' />
+<meta name='twitter:card' content='summary_large_image' />
+<meta name='twitter:site' content='@hackclub' />
+<meta name='twitter:creator' content='@hackclub' />
+<meta property='og:type' content='article' />
+<meta property='og:locale' content='en_US' />
+
+<meta name='keywords' content={keywords.join(',')} />
+<meta name='theme-color' content='#212529' />
+<link rel='icon' href='/favicon-on-dark.png' media='(prefers-color-scheme: dark)' />
+<link rel='icon' href='/favicon-on-light.png' media='(prefers-color-scheme: light)' />
+
+<link rel='sitemap' href='/sitemap-index.xml' />
+
+<meta property='article:published_time' content={publishedAt.toISOString()} />
+<meta property='article:modified_time' content={chapter.data.updatedAt.toISOString()} />
+<meta property='article:author:first_name' content='Lexi' />
+<meta property='article:author:last_name' content='Mattick' />
+<meta property='article:author:username' content='Kognise' />
+<meta property='article:author:gender' content='female' />
+{keywords.map(keyword => <meta property='article:tag' content={keyword} />)}
+
+<script type='application/ld+json'>
+	{JSON.stringify({
+		'@context': 'https://schema.org',
+		'@type': 'Article',
+		'headline': title,
+		'abstract': description,
+		'image': [
+			{
+				contentUrl: bannerUrl,
+				width: bannerWidth,
+				height: bannerHeight,
+				caption: bannerAlt
+			}
+		],
+		'dateCreated': publishedAt.toISOString(),
+		'datePublished': publishedAt.toISOString(),
+		'dateModified': chapter.data.updatedAt.toISOString(),
+		'author': [
+			{
+				'@type': 'Person',
+				'name': 'Lexi Mattick',
+				'url': 'https://kognise.dev/'
+			}
+		]
+	})}
+</script>

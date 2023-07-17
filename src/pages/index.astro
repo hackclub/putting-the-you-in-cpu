@@ -1,0 +1,121 @@
+---
+import '../styles/global.css'
+import '../styles/home.css'
+
+import { getEntryBySlug } from 'astro:content'
+import SEO from '../components/SEO.astro'
+import ColoredTitle from '../components/ColoredTitle.astro'
+import ExternalNav from '../components/ExternalNav.astro'
+import EditButton from '../components/EditButton.astro'
+
+const intro = await getEntryBySlug('chapters', 'intro')
+const chapterOne = await getEntryBySlug('chapters', 'the-basics')
+const { Content: Intro } = await intro.render()
+---
+
+<html lang='en'>
+<head>
+	<meta charset='utf-8' />
+	<meta name='viewport' content='width=device-width, initial-scale=1' />
+
+	<link rel='preconnect' href='https://fonts.googleapis.com' />
+	<link rel='preconnect' href='https://fonts.gstatic.com' crossorigin />
+	<link href='https://fonts.googleapis.com/css2?family=IBM+Plex+Serif:ital,wght@0,400;0,700;1,400&display=swap' rel='stylesheet' />
+
+	<SEO chapterSlug='intro' />
+</head>
+<body>
+	<a class='orpheus-flag' target='_blank' href='https://hackclub.com/'>
+		<img src='/orpheus-flag.svg' width='560' height='315' alt='A project by Hack Club' title='A project by Hack Club' />
+	</a>
+
+	<header>
+		<img src='/squiggles/top.svg' class='squiggles top' alt='' aria-hidden='true' />
+		<div class='content'>
+			<h1><ColoredTitle onDark /></h1>
+			<p class='abstract'>Curious exactly what happens when you run a program on your computer? Read this article to learn how multiprocessing works, what system calls really are, how computers manage memory with hardware interrupts, and how Linux loads executables.</p>
+			<p>
+				By
+				<a target='_blank' href='https://kognise.dev/'>Lexi Mattick</a>
+				&
+				<a href='https://hackclub.com/'>Hack Club</a>
+				&middot;
+				July, 2023
+			</p>
+		</div>
+		<img src='/squiggles/bottom.svg' class='squiggles bottom' alt='' aria-hidden='true' />
+	</header>
+	<ExternalNav noScript currentChapterSlug='intro' />
+
+	<main>
+		<div class='content'>
+			<h2 id='from-the-beginning'>
+				From the beginning&hellip;
+				<EditButton chapterSlug='intro' />
+			</h2>
+
+			<Intro />
+			<a class='continue' href='the-basics'>
+				Continue to Chapter 1: {chapterOne.data.title}
+				<span aria-hidden='true'>&raquo;</span>
+			</a>
+		</div>
+
+		<div class='scroll-padding' />
+	</main>
+<!-- 
+	<script lang='typescript'>
+		const header = document.querySelector('header')
+		const heightLimit = 400
+		const size = 80
+
+		const ellipse = {
+			x: 0.5,
+			y: 0.5,
+			rx: 0.4,
+			ry: 0.4
+		}
+
+		function isInEllipse(x, y) {
+			const { x: cx, y: cy, rx, ry } = ellipse
+			return Math.pow(x - cx, 2) / Math.pow(rx, 2) + Math.pow(y - cy, 2) / Math.pow(ry, 2) <= 1
+		}
+
+		function addSquiggle(name) {
+			let x, y
+			while (true) {
+				[ x, y ] = [ Math.random(), Math.random() ]
+				if (!isInEllipse(x, y)) break
+			}
+
+			const squiggle = document.createElement('img')
+			squiggle.src = `/squiggles/${name}`
+			squiggle.width = size
+			squiggle.height = size
+			squiggle.classList.add('squiggle')
+			squiggle.style.top = `${y * (heightLimit - size)}px`
+			squiggle.style.left = `calc(${x} * (100% - ${size}px))`
+			header.appendChild(squiggle)
+		}
+
+		const squiggles = [
+			'cpu.svg',
+			'squiggle-1.svg',
+			'squiggle-1.svg',
+			'squiggle-1.svg',
+			'squiggle-2.svg',
+			'squiggle-2.svg',
+			'squiggle-2.svg',
+			'star.svg',
+			'star.svg',
+			'smiley.svg',
+			'smiley.svg',
+		]
+
+		while (squiggles.length > 0) {
+			const squiggle = squiggles.splice(Math.floor(Math.random() * squiggles.length), 1)[0]
+			addSquiggle(squiggle)
+		}
+	</script> -->
+</body>
+</html>

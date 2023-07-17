@@ -1,0 +1,133 @@
+---
+chapter: 4
+title: Becoming an Elf-Lord
+shortname: ELF
+slug: becoming-an-elf-lord
+updatedAt: 2023-07-17T17:16:18.079Z
+---
+
+import CodeBlock from '../../components/CodeBlock.astro'
+
+We pretty thoroughly understand `execve` now. At the end of most paths, the kernel will reach a final program containing machine code for it to launch. Typically, a setup process is required before actually jumping to the code — for example, different parts of the program have to be loaded into the right places in memory. Each program needs different amounts of memory for different things, so we have standard file formats that specify how to set up a program for execution. While Linux supports many such formats, the most common format by far is *ELF* (executable and linkable format).
+
+<p>
+	<img src='/images/gnu-linux-elf-drawing.jpg' loading='lazy' style='max-width: 260px; margin: 0 auto;' alt='A marker drawing on paper. A wizard elf is shown meditating, holding the head of a gnu in one hand and a Linux penguin in the other. The elf trails off, saying "Well, actually, Linux is just the kernel, the operating system is..." The drawing is captioned in red marker: "You&apos;ve heard of elf on a shelf! Now, get ready for... elf on a GNU/Linux." The drawing is signed "Nicky."' width='529' height='256' />
+</p>
+<div style='text-align: center;'>
+	<p style='margin-top: -10px;'>
+		(Thank you to <a href='https://ncase.me/' target='_blank'>Nicky Case</a> for the adorable drawing.)
+	</p>
+</div>
+
+> **Aside: are elves everywhere?**
+> 
+> When you run an app or command-line program on Linux, it's exceedingly likely that it's an ELF binary. However, on macOS the de-facto format is  [Mach-O](https://en.wikipedia.org/wiki/Mach-O) instead. Mach-O does all the same things as ELF but is structured differently. On Windows, .exe files use the [Portable Executable](https://en.wikipedia.org/wiki/Portable_Executable) format which is, again, a different format with the same concept.
+
+In the Linux kernel, ELF binaries are handled by the `binfmt_elf` handler, which is more complex than many other handlers and contains thousands of lines of code. It's responsible for parsing out certain details from the ELF file and using them to load the process into memory and execute it.
+
+*I ran some command-line kung fu to sort binfmt handlers by line count:*
+
+<CodeBlock name='Shell session'>
+```
+$ wc -l binfmt_* | sort -nr | sed 1d
+    2181 binfmt_elf.c
+    1658 binfmt_elf_fdpic.c
+     944 binfmt_flat.c
+     836 binfmt_misc.c
+     158 binfmt_script.c
+      64 binfmt_elf_test.c
+```
+</CodeBlock>
+
+## File Structure
+
+Before looking more deeply at how `binfmt_elf` executes ELF files, let's take a look at the file format itself. ELF files are typically made up of four parts:
+
+<img src='/images/elf-file-structure.png' loading='lazy' style='max-width: 500px; margin: 0 auto;' alt='A diagram showing an overview of the structure of ELF files, with four sequential sections. Section 1, ELF Header: basic information about the binary, and locations of PHT and SHT. Section 2, Program Header Table (PHT): describes how and where to load the ELF file&apos;s data into memory. Section 3, Section Header Table (SHT): optional "map" of the data to assist in debugging. Section 4, Data: all of the binary&apos;s data. The PHT and SHT point into this section.' width='1033' height='786' />
+
+### ELF Header
+
+Every ELF file has an [ELF header](https://refspecs.linuxfoundation.org/elf/gabi4+/ch4.eheader.html). It has the very important job of conveying basic information about the binary such as:
+
+- What processor it's designed to run on. ELF files can contain machine code for different processor types, like ARM and x86.
+- Whether the binary is meant to be run on its own as an executable, or whether it's meant to be loaded by other programs as a "dynamically linked library." We'll go into details about what dynamic linking is soon.
+- The entry point of the executable. Later sections specify exactly where to load data contained in the ELF file into memory. The entry point is a memory address pointing to where the first machine code instruction is in memory after the entire process has been loaded.
+
+The ELF header is always at the start of the file. It specifies the locations of the program header table and section header, which can be anywhere within the file. Those tables, in turn, point to data stored elsewhere in the file.
+
+### Program Header Table
+
+The [program header table](https://refspecs.linuxbase.org/elf/gabi4+/ch5.pheader.html) is a series of entries containing specific details for how to load and execute the binary at runtime. Each entry has a type field that says what detail it's specifying — for example, `PT_LOAD` means it contains data that should be loaded into memory, but `PT_NOTE` means the segment contains informational text that shouldn't necessarily be loaded anywhere.
+
+<img src='/images/elf-program-header-types.png' loading='lazy' style='max-width: 500px; margin: 0 auto;' alt='A table showing four different common program header types. Type 1, PT_LOAD: data to be loaded into memory. Type 2, PT_NOTE: freeform text like copyright notices, version info, etc.. Type 3, PT_DYNAMIC: Info about dynamic linking. Type 4, PT_INTERP: Path to the location of an "ELF interpreter."' width='904' height='338' />
+
+Each entry specifies information about where its data is in the file and, sometimes, how to load the data into memory:
+
+- It points to the position of its data within the ELF file.
+- It can specify what virtual memory address the data should be loaded into memory at. This is typically left blank if the segment isn't meant to be loaded into memory.
+- Two fields specify the length of the data: one for the length of the data in the file, and one for the length of the memory region to be created. If the memory region length is longer than the length in the file, the extra memory will be filled with zeroes. This is beneficial for programs that might want a static segment of memory to use at runtime; these empty segments of memory are typically called [BSS](https://en.wikipedia.org/wiki/.bss) segments.
+- Finally, a flags field specifies what operations should be permitted if it's loaded into memory: `PF_R` makes it readable, `PF_W` makes it writable, and `PF_X` means it's code that should be allowed to execute on the CPU.
+
+### Section Header Table
+
+The [section header table](https://refspecs.linuxbase.org/elf/gabi4+/ch4.sheader.html) is a series of entries containing information about *sections*. This section information is like a map, charting the data inside the ELF file. It makes it easy for [programs like debuggers](https://www.sourceware.org/gdb/) to understand the intended uses of different portions of the data.
+
+<img src='/images/elf-section-header-table-diagram.png' loading='lazy' style='max-width: 450px; margin: 0 auto;' alt='An old treasure map with islands, rivers, palm trees, and a compass rose. Some of the islands are labeled with ELF section names such as ".text", ".data", ".shstrtab", and ".bss". The drawing is captioned "The section header table is like a map for binary data."' width='701' height='617' />
+
+For example, the program header table can specify a large swath of data to be loaded into memory together. That single `PT_LOAD` block might contain both code and global variables! There's no reason those have to be specified separately to *run* the program; the CPU just starts at the entry point and steps forward, accessing data when and where the program requests it. However, software like a debugger for *analyzing* the program needs to know exactly where each area starts and ends, otherwise it might try to decode some text that says "hello" as code (and since that isn't valid code, explode). This information is stored in the section header table.
+
+While it's usually included, the section header table is actually optional. ELF files can run perfectly well with the section header table completely removed, and developers who want to hide what their code does will sometimes intentionally strip or mangle the section header table from their ELF binaries to [make them harder to decode](https://binaryresearch.github.io/2019/09/17/Analyzing-ELF-Binaries-with-Malformed-Headers-Part-1-Emulating-Tiny-Programs.html).
+
+Each section has a name, a type, and some flags that specify how it's intended to be used and decoded. Standard names usually start with a dot by convention. The most common sections are:
+
+- `.text`: machine code to be loaded into memory and executed on the CPU. `SHT_PROGBITS` type with the `SHF_EXECINSTR` flag to mark it as executable, and the `SHF_ALLOC` flag which means it's loaded into memory for execution. (Don't get confused by the name, it's still just binary machine code! I always found it somewhat strange that it's called `.text` despite not being readable "text.")
+- `.data`: initialized data hardcoded in the executable to be loaded into memory. For example, a global variable containing some text might be in this section. If you write low-level code, this is the section where statics go. This also has the type `SHT_PROGBITS`, which just means the section contains "information for the program." Its flags are `SHF_ALLOC` and `SHF_WRITE` to mark it as writable memory.
+- `.bss`: I mentioned earlier that it's common to have some allocated memory that starts out zeroed. It would be a waste to include a bunch of empty bytes in the ELF file, so a special segment type called BSS is used. It's helpful to know about BSS segments during debugging, so there's also a section header table entry that specifies the length of the memory to be allocated. It's of type `SHT_NOBITS`, and is flagged `SHF_ALLOC` and `SHF_WRITE`.
+- `.rodata`: this is like `.data` except it's read-only. In a very basic C program that runs `printf("Hello, world!")`, the string "Hello world!" would be in a `.rodata` section, while the actual printing code would be in a `.text` section.
+- `.shstrtab`: this is a fun implementation detail! The names of sections themselves (like `.text` and `.shstrtab`) aren't included directly in the section header table. Instead, each entry contains an offset to a location in the ELF file that contains its name. This way, each entry in the section header table can be the same size, making them easier to parse — an offset to the name is a fixed-size number, whereas including the name in the table would use a variable-size string. All of this name data is stored in its own section called `.shstrtab`, of type `SHT_STRTAB`.
+
+### Data
+
+The program and section header table entries all point to blocks of data within the ELF file, whether to load them into memory, to specify where program code is, or just to name sections. All of these different pieces of data are contained in the data section of the ELF file.
+
+<img src='/images/elf-data-section.png' loading='lazy' style='max-width: 680px;' alt='A diagram demonstrating how different parts of the ELF file reference locations within the data block. A continuous collection of data is depicted, fading out at the end, containing some clearly recognizable things such as the path to an ELF interpreter, the section title ".rodata", and the string "Hello, world!" A couple example ELF sections float above the data block, with arrows pointing to their data. For example, the data sections from both the PHT and SHT entry examples point to the same "Hello, world!" text. The SHT entry&apos;s label is also stored in the data block.' width='1210' height='386' />
+
+## A Brief Explanation of Linking 
+
+Back to the `binfmt_elf` code: the kernel cares about two types of entries in the program header table.
+
+`PT_LOAD` segments specify where all the program data, like the `.text` and `.data` sections, need to be loaded into memory. The kernel reads these entries from the ELF file to load the data into memory so the program can be executed by the CPU.
+
+The other type of program header table entry that the kernel cares about is `PT_INTERP`, which specifies a "dynamic linking runtime."
+
+Before we talk about what dynamic linking is, let's talk about "linking" in general. Programmers tend to build their programs on top of libraries of reusable code — for example, libc, which we talked about earlier. When turning your source code into an executable binary, a program called a linker resolves all these references by finding the library code and copying it into the binary. This process is called *static linking*, which means external code is included directly in the file that's distributed.
+
+However, some libraries are super common. You'll find libc is used by basically every program under the sun, since it's the canonical interface for interacting with the OS through syscalls. It would be a terrible use of space to include a separate copy of libc in every single program on your computer. Also, it might be nice if bugs in libraries could be fixed in one place rather than having to wait for each program that uses the library to be updated. Dynamic linking is the solution to these problems.
+
+If a statically linked program needs a function `foo` from a library called `bar`, the program would include a copy of the entirety of `foo`. However, if it's dynamically linked it would only include a reference saying "I need `foo` from library `bar`." When the program is run, `bar` is hopefully installed on the computer and the `foo` function's machine code can be loaded into memory on-demand. If the computer's installation of the `bar` library is updated, the new code will be loaded the next time the program runs without needing any change in the program itself.
+
+<img src='/images/static-vs-dynamic-linking.png' loading='lazy' alt='A diagram showing the difference between static and dynamic linking. On the left, static linking is shown with the contents of some code called "foo" being separately copied into two programs. This is accompanied with text saying that library functions are copied from the developer&apos;s computer into each binary at built time. On the right side, dynamic linking is shown: each program contains the name of the "foo" function, with arrows pointing outside the programs into the foo program lying on the user&apos;s computer. This is paired with accompanying text stating that binaries reference the names of library functions, which are loaded from the user&apos;s computer at runtime.' width='1800' height='860' class='big' style='--max-width: 900px;' />
+
+## Dynamic Linking in the Wild
+
+On Linux, dynamically linkable libraries like `bar` are typically packaged into files with the .so (Shared Object) extension. These .so files are ELF files just like programs — you may recall that the ELF header includes a field to specify whether the file is an executable or a library. In addition, shared objects have a `.dynsym` section in the section header table which contains information on what symbols are exported from the file and can be dynamically linked to.
+
+On Windows, libraries like `bar` are packaged into .dll (**d**ynamic **l**ink **l**ibrary) files. macOS uses the .dylib (**dy**namically linked **lib**rary) extension. Just like macOS apps and Windows .exe files, these are formatted slightly differently from ELF files but are the same concept and technique.
+
+An interesting distinction between the two types of linking is that with static linking, only the portions of the library that are used are included in the executable and thus loaded into memory. With dynamic linking, the *entire library* is loaded into memory. This might initially sound less efficient, but it actually allows modern operating systems to save *more* space by loading a library into memory once and then sharing that code between processes. Only code can be shared as the library needs different state for different programs, but the savings can still be on the order of tens to hundreds of megabytes of RAM.
+
+## Execution
+
+Let's hop on back to the kernel running ELF files: if the binary it's executing is dynamically linked, the OS can't just jump to the binary's code right away because there would be missing code — remember, dynamically linked programs only have references to the library functions they need!
+
+To run the binary, the OS needs to figure out what libraries are needed, load them, replace all the named pointers with actual jump instructions, and *then* start the actual program code. This is very complex code that interacts deeply with the ELF format, so it's usually a standalone program rather than part of the kernel. ELF files specify the path to the program they want to use (typically something like `/lib64/ld-linux-x86-64.so.2`) in a `PT_INTERP` entry in the program header table.
+
+After reading the ELF header and scanning through the program header table, the kernel can set up the memory structure for the new program. It starts by loading all `PT_LOAD` segments into memory, populating the program's static data, BSS space, and machine code. If the program is dynamically linked, the kernel will have to execute the [ELF interpreter](https://unix.stackexchange.com/questions/400621/what-is-lib64-ld-linux-x86-64-so-2-and-why-can-it-be-used-to-execute-file) (`PT_INTERP`), so it also loads the interpreter's data, BSS, and code into memory.
+
+Now the kernel needs to set the instruction pointer for the CPU to restore when returning to userland. If the executable is dynamically linked, the kernel sets the instruction pointer to the start of the ELF interpreter's code in memory. Otherwise, the kernel sets it to the start of the executable.
+
+The kernel is almost ready to return from the syscall (remember, we're still in `execve`). It pushes the `argc`, `argv`, and environment variables to the stack for the program to read when it begins.
+
+The registers are now cleared. Before handling a syscall, the kernel stores the current value of registers to the stack to be restored when switching back to user space. Before returning to user space, the kernel zeroes this part of the stack.
+
+Finally, the syscall is over and the kernel returns to userland. It restores the registers, which are now zeroed, and jumps to the stored instruction pointer. That instruction pointer is now the starting point of the new program (or the ELF interpreter) and the current process has been replaced!

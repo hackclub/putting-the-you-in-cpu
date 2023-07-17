@@ -1,0 +1,28 @@
+---
+interface Props {
+	headings: { depth: number, slug: string, text: string }[]
+}
+
+const firstLayer = []
+let depth
+
+for (const heading of Astro.props.headings) {
+	if (!firstLayer.length || heading.depth <= depth) {
+		depth = heading.depth
+		firstLayer.push({ ...heading, children: [] })
+	} else if (heading.depth > depth) {
+		firstLayer.at(-1).children.push(heading)
+	}
+}
+---
+
+<ul>
+	{firstLayer.map(heading => (
+		<li>
+			<a href={'#' + heading.slug} data-scrollspy={heading.slug}>
+				{heading.text}
+			</a>
+			{heading.children.length > 0 ? <Astro.self headings={heading.children} /> : null}
+		</li>
+	))}
+</ul>
