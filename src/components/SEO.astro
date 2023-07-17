@@ -17,11 +17,12 @@ const description = 'Curious exactly what happens when you run a program on your
 const canonicalUrl = new URL(Astro.url.pathname, Astro.site)
 const publishedAt = new Date(2023, 6, 17)
 const articleTitle = 'Putting the "You" in CPU'
+const chapterTitle = chapter.data.title.replace(/[“”]/g, '"')
 const keywords = [ 'unix', 'linux', 'mmu', 'paging', 'memory management', 'cpu', 'program execution', 'elf', 'elf format', 'timeslicing', 'fork', 'cow' ]
 ---
 
-<title>{`${chapter.data.title} | ${articleTitle}`}</title>
-<meta property='og:title' content={chapter.data.chapter === 0 ? articleTitle : chapter.data.title} />
+<title>{`${chapterTitle} | ${articleTitle}`}</title>
+<meta property='og:title' content={chapter.data.chapter === 0 ? articleTitle : chapterTitle} />
 <meta property='og:site_name' content={articleTitle} />
 
 <meta name='description' content={description} />
@@ -58,11 +59,12 @@ const keywords = [ 'unix', 'linux', 'mmu', 'paging', 'memory management', 'cpu',
 <meta property='article:author:gender' content='female' />
 {keywords.map(keyword => <meta property='article:tag' content={keyword} />)}
 
-<script type='application/ld+json'>
-	{JSON.stringify({
+<script
+	type='application/ld+json'
+	set:html={JSON.stringify({
 		'@context': 'https://schema.org',
 		'@type': 'Article',
-		'headline': title,
+		'headline': `${chapterTitle} - ${articleTitle}`,
 		'abstract': description,
 		'image': [
 			{
@@ -83,4 +85,4 @@ const keywords = [ 'unix', 'linux', 'mmu', 'paging', 'memory management', 'cpu',
 			}
 		]
 	})}
-</script>
+/>
