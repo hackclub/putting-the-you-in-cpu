@@ -145,6 +145,10 @@ hr {
 	& p:not(:first-child) {
 		font-style: italic;
 	}
+
+	& a {
+		--color: #b197fc;
+	}
 }
 
 .content {
