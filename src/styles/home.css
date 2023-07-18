@@ -81,6 +81,7 @@ header {
 
 	& .squiggles {
 		pointer-events: none;
+		user-select: none;
 		width: 100%;
 		position: absolute;
 		left: 0;
