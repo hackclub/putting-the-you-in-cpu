@@ -137,7 +137,7 @@ h1 {
 	}
 
 	html, body, main {
-		overflow: unset;
+		overflow: auto;
 	}
 }
 
