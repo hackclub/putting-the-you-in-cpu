@@ -114,7 +114,7 @@ $
 
 > **Aside: segfault ontology**
 > 
-> "Segmentation fault" means different things in different contexts. The MMU triggers a hardware interrupt called a "segmentation fault" when memory is read without permission, but "segmentaxftion fault" is also the name of a signal the OS can send to running programs to terminate them due to any illegal memory access.
+> "Segmentation fault" means different things in different contexts. The MMU triggers a hardware interrupt called a "segmentation fault" when memory is read without permission, but "segmentation fault" is also the name of a signal the OS can send to running programs to terminate them due to any illegal memory access.
 
 In other cases, memory accesses can *intentionally* fail, allowing the OS to populate the memory and then *hand control back to the CPU to try again*. For example, the OS can map a file on disk to virtual memory without actually loading it into RAM, and then load it into physical memory when the address is requested and a page fault occurs. This is called *demand paging*.
 
