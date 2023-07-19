@@ -126,3 +126,19 @@ nav.external {
 h2 {
 	margin-top: 80px;
 }
+
+@media print {
+	html, main {
+		background: #ffffff;
+	}
+
+	.orpheus-flag, header .squiggles {
+		display: none;
+	}
+
+	header {
+		color: #000000;
+		padding: 20px;
+		margin-bottom: -40px;
+	}
+}

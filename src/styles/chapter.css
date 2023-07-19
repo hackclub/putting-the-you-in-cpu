@@ -120,9 +120,6 @@ h1 {
 
 	& p {
 		margin: 5px 0;
-	}
-
-	& p {
 		font-style: italic;
 	}
 }
@@ -137,7 +134,7 @@ h1 {
 	}
 
 	html, body, main {
-		overflow: auto;
+		overflow: visible;
 	}
 }
 
@@ -149,5 +146,28 @@ h1 {
 	.you-are-here p {
 		margin-top: 0;
 		margin-bottom: 10px;
+	}
+}
+
+@media print {
+	:root {
+		--toc-width: 0;
+	}
+
+	header {
+		font-size: 1.1em;
+		text-align: center;
+	}
+
+	nav.internal, .you-are-here {
+		display: none;
+	}
+
+	main {
+		padding: 0;
+	}
+
+	html, body, main {
+		overflow: visible;
 	}
 }
