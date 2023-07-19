@@ -126,7 +126,7 @@ h1 {
 
 @media (max-width: 720px) {
 	:root {
-		--toc-width: 0;
+		--toc-width: 0px;
 	}
 
 	nav.internal {
@@ -151,7 +151,7 @@ h1 {
 
 @media print {
 	:root {
-		--toc-width: 0;
+		--toc-width: 0px;
 	}
 
 	header {
