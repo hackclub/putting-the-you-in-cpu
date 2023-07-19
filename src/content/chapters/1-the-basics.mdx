@@ -3,7 +3,7 @@ chapter: 1
 title: The “Basics”
 shortname: Basics
 slug: the-basics
-updatedAt: 2023-07-17T17:16:18.079Z
+updatedAt: 2023-07-19T18:57:54.630Z
 ---
 
 The one thing that surprised me over and over again while writing this article was how *simple* computers are. It's still hard for me not to psych myself out, expecting more complexity or abstraction than actually exists! If there's one thing you should burn into your brain before continuing, it's that everything that seems simple actually is that simple. This simplicity is very beautiful and sometimes very, very cursed.
@@ -80,7 +80,7 @@ Processors start in kernel mode. Before executing a program, the kernel initiate
 
 <img src='/images/kernel-mode-vs-user-mode.png' loading='lazy' style='max-width: 500px; margin: 0 auto;' alt='Two fake iMessage screenshots demonstrating the different between user and kernel mode protections. The first, labeled Kernel Mode: right side says "Read this protected memory!", left side replies "Here you go, dear :)". The second, labeled User Mode: right side says "Read this protected memory!", left side replies "No! Segmentation fault!"' width='1072' height='433' />
 
-An example of how processor modes manifest in a real architecture: on x86-64, the current privilege level (CPL) can be read from a register called `cs` (code segment). Specifically, the CPL is contained in the two [least significant bits](https://en.wikipedia.org/wiki/Bit_numbering) of the `cs` register. Those two bits can store x86-64's four possible rings: ring 0 is kernel mode and ring 3 is user mode. Rings 1 and 2 are designed for running drivers but are only used by a handful of older niche operating systems. If the CPL bits are `11`, for example, the CPU is running in ring 3: kernel mode.
+An example of how processor modes manifest in a real architecture: on x86-64, the current privilege level (CPL) can be read from a register called `cs` (code segment). Specifically, the CPL is contained in the two [least significant bits](https://en.wikipedia.org/wiki/Bit_numbering) of the `cs` register. Those two bits can store x86-64's four possible rings: ring 0 is kernel mode and ring 3 is user mode. Rings 1 and 2 are designed for running drivers but are only used by a handful of older niche operating systems. If the CPL bits are `11`, for example, the CPU is running in ring 3: user mode.
  
 ## What Even is a Syscall?
 
