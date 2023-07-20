@@ -134,7 +134,7 @@ h1 {
 	}
 
 	html, body, main {
-		overflow: visible;
+		overflow: auto;
 	}
 }
 
