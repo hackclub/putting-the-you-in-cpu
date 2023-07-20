@@ -18,7 +18,7 @@ And you know what they say... you only truly understand something if you can exp
 
 > In a hurry? Feel like you know this stuff already?
 >
-> [Read chapter 3](/how-to-run-a-program) and I guarantee you will learn something new. Unless you're like, Linus Torvalds himself.
+> [Read chapter 3](https://cpu.land/how-to-run-a-program) and I guarantee you will learn something new. Unless you're like, Linus Torvalds himself.
 
 <br>
 
