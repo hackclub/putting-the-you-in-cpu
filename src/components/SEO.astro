@@ -13,8 +13,10 @@ const bannerAlt = ''
 const bannerWidth = 1280
 const bannerHeight = 640
 
-const description = 'Curious exactly what happens when you run a program on your computer? Learn how multiprocessing works, what system calls really are, how computers manage memory with hardware interrupts, and how Linux loads executables.'
 const canonicalUrl = new URL(Astro.url.pathname, Astro.site)
+canonicalUrl.pathname = canonicalUrl.pathname.replace(/\/$/, '') // Strip slash from the end of the path
+
+const description = 'Curious exactly what happens when you run a program on your computer? Learn how multiprocessing works, what system calls really are, how computers manage memory with hardware interrupts, and how Linux loads executables.'
 const publishedAt = new Date(2023, 6, 17)
 const articleTitle = 'Putting the "You" in CPU'
 const chapterTitle = chapter.data.title.replace(/[“”]/g, '"')
