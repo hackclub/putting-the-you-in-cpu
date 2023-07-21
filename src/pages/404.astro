@@ -2,7 +2,8 @@
 import '../styles/global.css'
 import '../styles/404.css'
 
-const url = Astro.url.toString()
+const url = new URL(Astro.url.pathname, Astro.site)
+url.pathname = url.pathname.replace(/\/$/, '') // Strip slash from the end of the path
 ---
 
 <html lang='en'>
@@ -28,7 +29,7 @@ const url = Astro.url.toString()
 <body>
 	
 	<main>
-		<p>$ curl {url}</p>
+		<p>$ curl {url.toString()}</p>
 		<h1>Segmentation fault (core dumped)</h1>
 		<br>
 		<p>$ # Looks like you wound up accessing a memory region &mdash; errr, page &mdash; that doesn&lsquo;t exist.</p>

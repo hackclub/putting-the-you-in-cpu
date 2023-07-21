@@ -22,7 +22,9 @@ export default defineConfig({
 		mdx({
 			rehypePlugins: [ rehypeExternalLinksConfig, rehypePresetMinify ]
 		}),
-		sitemap()
+		sitemap({
+			filter: page => page !== 'https://cpu.land/404'
+		})
 	],
 	markdown: {
 		smartypants: true,
