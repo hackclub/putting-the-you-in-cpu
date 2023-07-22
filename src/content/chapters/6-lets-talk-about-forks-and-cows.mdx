@@ -18,7 +18,7 @@ The answer is another system call: `fork`, the system call fundamental to all mu
 
 The newly running process is referred to as the "child," with the process originally calling `fork` the "parent." Processes can call `fork` multiple times, thus having multiple children. Each child is numbered with a *process ID* (PID), starting with 1.
 
-Cluelessly doubling the same code is pretty useless, so `fork` returns a different value on the parent vs the child. On the child, it returns the PID of the new process, while on the parent it returns 0. This makes it possible to do different work on the new process so that forking is actually helpful.
+Cluelessly doubling the same code is pretty useless, so `fork` returns a different value on the parent vs the child. On the parent, it returns the PID of the new child process, while on the child it returns 0. This makes it possible to do different work on the new process so that forking is actually helpful.
 
 <CodeBlock name='main.c'>
 ```c
@@ -33,11 +33,11 @@ pid_t pid = fork();
 // are not one of a kind.
 
 if (pid == 0) {
-	// We're in the parent.
-	// Probably continue whatever we were doing before.
-} else {
 	// We're in the child.
 	// Do some computation and feed results to the parent!
+} else {
+	// We're in the parent.
+	// Probably continue whatever we were doing before.
 }
 ```
 </CodeBlock>
@@ -50,12 +50,15 @@ Anyways, Unix programs launch new programs by calling `fork` and then immediatel
 ```c
 pid_t pid = fork();
 
-if (pid != 0) {
+if (pid == 0) {
 	// Immediately replace the child process with the new program.
 	execve(...);
 }
 
 // Since we got here, the process didn't get replaced. We're in the parent!
+// Helpfully, we also now have the PID of the new child process in the PID
+// variable, if we ever need to kill it.
+
 // Parent program continues here...
 ```
 </CodeBlock>
