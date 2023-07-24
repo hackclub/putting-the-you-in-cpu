@@ -32,7 +32,7 @@ To enable paging at boot, the kernel first constructs the page table in RAM. The
 
 The magic of the paging system is that the page table can be edited while the computer is running. This is how each process can have its own isolated memory space — when the OS switches context from one process to another, an important task is remapping the virtual memory space to a different area in physical memory. Let's say you have two processes: process A can have its code and data (likely loaded from an ELF file!) at `0x0000000000400000`, and process B can access its code and data from the very same address. Those two processes can even be the same program, because they aren't actually fighting over that address range! The data for process A is somewhere far from process B in physical memory, and is mapped to `0x0000000000400000` by the kernel when switching to the process.
 
-<img src='/images/process-virtual-memory-mapping.png' loading='lazy' alt='A diagram showing two different processes asking a cheesy clip art image of an anthropomorphic desktop computer to translate the same memory address. The anthropomorphic computer responds to each process with a different section from within the continous strip of physical memory.' width='2101' height='1010' />
+<img src='/images/process-virtual-memory-mapping.png' loading='lazy' alt='A diagram showing two different processes asking a cheesy clip art image of an anthropomorphic desktop computer to translate the same memory address. The anthropomorphic computer responds to each process with a different section from within the continuous strip of physical memory.' width='2101' height='1010' />
 
 > **Aside: cursed ELF fact**
 >
