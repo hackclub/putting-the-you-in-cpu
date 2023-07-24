@@ -3,7 +3,7 @@ chapter: 2
 title: Slice Dat Time
 shortname: Multitasking
 slug: slice-dat-time
-updatedAt: 2023-07-17T17:16:18.079Z
+updatedAt: 2023-07-24T16:15:29.560Z
 ---
 
 Let's say you're building an operating system and you want users to be able to run multiple programs at once. You don’t have a fancy multi-core processor though, so your CPU can only run one instruction at a time!
@@ -37,9 +37,13 @@ A *timeslice* is the duration an OS scheduler allows a process to run before pre
 > 
 > Speaking of timeslice jargon, Linux kernel devs use the [jiffy](https://github.com/torvalds/linux/blob/22b8cc3e78f5448b4c5df00303817a9137cd663f/include/linux/jiffies.h) time unit to count fixed frequency timer ticks. Among other things, jiffies are used for measuring the lengths of timeslices. Linux's jiffy frequency is typically 1000 Hz but can be configured when compiling the kernel.
 
-A slight improvement to fixed timeslice scheduling is to pick a *target latency* — the ideal longest time for a process to respond. The target latency should be equal to the time it takes for a process to resume execution after being preempted. Timeslices are calculated by dividing the target latency by the total number of tasks; this is better than fixed timeslice scheduling because it eliminates wasteful task switching with fewer processes. With a target latency of 15&nbsp;ms and 10 processes, each process would get 15/10 or 1.5&nbsp;ms to run. With only 3 processes, each process gets a longer 5&nbsp;ms timeslice while still hitting the target latency.
+A slight improvement to fixed timeslice scheduling is to pick a *target latency* — the ideal longest time for a process to respond. The target latency is the time it takes for a process to resume execution after being preempted, assuming a reasonable number of processes. *This is pretty hard to visualize! Don't worry, a diagram is coming soon.*
 
-Process switching is computationally expensive because it requires saving the entire state of the current program and restoring a different one. Past a certain threshold, too small a calculated timeslice can result in worse performance than having a longer fixed timeslice. It's common to have a fixed timeslice that serves as a lower bound when there are many processes. At the time of writing this article, Linux's scheduler uses a target latency of 6&nbsp;ms and a minimum granularity of 0.75&nbsp;ms.
+Timeslices are calculated by dividing the target latency by the total number of tasks; this is better than fixed timeslice scheduling because it eliminates wasteful task switching with fewer processes. With a target latency of 15&nbsp;ms and 10 processes, each process would get 15/10 or 1.5&nbsp;ms to run. With only 3 processes, each process gets a longer 5&nbsp;ms timeslice while still hitting the target latency.
+
+Process switching is computationally expensive because it requires saving the entire state of the current program and restoring a different one. Past a certain point, too small a timeslice can result in performance problems with processes switching too rapidly. It's common to give the timeslice duration a lower bound (*minimum granularity*). This does mean that the target latency is exceeded when there are enough processes for the minimum granularity to take effect.
+
+At the time of writing this article, Linux's scheduler uses a target latency of 6&nbsp;ms and a minimum granularity of 0.75&nbsp;ms.
 
 <img src='/images/linux-scheduler-target-latency.png' loading='lazy' style='max-width: 500px; margin: 0 auto;' alt='A diagram titled "Naive Dynamic Timeslice Round-Robin Scheduling." It depicts a time series of 3 different processes getting time to execute in a repeated cycle. In between the execution blocks of each process is a much shorter block labeled "kernel scheduler." The length of each program execution block is labeled "timeslice (2ms)." The distance from the start of process 1 executing to the next start of process 1 executing, encompassing the execution time of processes 2 and 3, is labeled as "target latency (6ms)."' width='935' height='433' />
 
