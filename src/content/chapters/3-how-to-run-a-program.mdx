@@ -213,7 +213,34 @@ It just so happens that `binfmt_script` is one of those places that *assumes* `a
 - Arguments to the interpreter
 - Filename of the script
 
-So if the `argv` passed to the syscall is `[ "A", "B", "C" ]` and the shebang is `#!/usr/bin/node --experimental-module`, the modified `argv` will be `[ "/usr/bin/node", "--experimental-module", "B", "C" ]`.
+<blockquote>
+**Example: Argument Modification**
+
+Let's look at a sample `execve` call:
+
+<CodeBlock>
+```c
+// Arguments: filename, argv, envp
+execve("./script", [ "A", "B", "C" ], []);
+```
+</CodeBlock>
+
+This hypothetical `script` file has the following shebang as its first line:
+
+<CodeBlock name='script' startLine={1}>
+```js
+#!/usr/bin/node --experimental-module
+```
+</CodeBlock>
+
+The modified `argv` finally passed to the Node interpreter will be:
+
+<CodeBlock>
+```c
+[ "/usr/bin/node", "--experimental-module", "./script", "B", "C" ]
+```
+</CodeBlock>
+</blockquote>
 
 After updating `argv`, the handler finishes preparing the file for execution by setting `linux_binprm.interp` to the interpreter path (in this case, the Node binary). Finally, it returns 0 to indicate success preparing the program for execution.
 
