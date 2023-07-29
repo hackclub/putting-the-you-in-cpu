@@ -18,7 +18,7 @@ If you have any questions (or corrections) about anything contained in this arti
 
 ## Bonus: Translating C Concepts
 
-If you've done some low-level programming yourself, you probably know what a stack and heap are and you've probably used `malloc`. You might not have thought a lot about how they're implemented!
+If you've done some low-level programming yourself, you probably know what the stack and the heap are and you've probably used `malloc`. You might not have thought a lot about how they're implemented!
 
 First of all, a thread's stack is a fixed amount of memory that's mapped somewhere high up in virtual memory. The stack pointer starts at the top of the stack memory and moves downward as it increments. Physical memory is not allocated up front for the entire mapped stack space; instead, demand paging is used to lazily allocate memory as frames of the stack are reached.
 
