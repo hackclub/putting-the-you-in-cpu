@@ -106,7 +106,7 @@ Here's what we know so far about system calls:
 
 - User mode programs can't access I/O or memory directly. They have to ask the OS for help interacting with the outside world.
 - Programs can delegate control to the OS with special machine code instructions like INT and IRET.
-- Programs can't directly switch privilege levels; hardware interrupts are safe because the processor has been preconfigured *by the OS* with where in the OS code to jump to. The interrupt vector table can only be configured from kernel mode.
+- Programs can't directly switch privilege levels; software interrupts are safe because the processor has been preconfigured *by the OS* with where in the OS code to jump to. The interrupt vector table can only be configured from kernel mode.
 
 Programs need to pass data to the operating system when triggering a syscall; the OS needs to know which specific system call to execute alongside any data the syscall itself needs, for example, what filename to open. The mechanism for passing this data varies by operating system and architecture, but it's usually done by placing data in certain registers or on the stack before triggering the interrupt.
 
