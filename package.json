@@ -16,6 +16,7 @@
 		"astro": "^2.1.8",
 		"jsdom": "^22.1.0",
 		"postcss-nesting": "^11.2.2",
+		"puppeteer": "^21.0.2",
 		"rehype-external-links": "^2.0.1",
 		"rehype-preset-minify": "^6.0.0",
 		"shiki": "^0.14.2"
