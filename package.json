@@ -12,12 +12,12 @@
 		"@astrojs/mdx": "^0.18.2",
 		"@astrojs/sitemap": "^1.2.1",
 		"@astrojs/vercel": "^3.2.1",
+		"@types/jsdom": "^21.1.1",
 		"astro": "^2.1.8",
+		"jsdom": "^22.1.0",
 		"postcss-nesting": "^11.2.2",
 		"rehype-external-links": "^2.0.1",
-		"rehype-preset-minify": "^6.0.0"
-	},
-	"dependencies": {
+		"rehype-preset-minify": "^6.0.0",
 		"shiki": "^0.14.2"
 	}
 }

@@ -4,6 +4,48 @@ export interface Props {
 }
 
 const { onDark } = Astro.props
+
+const onLightColors = [ '#e03131', '#f59f00', '#2f9e44', '#1971c2', '#9c36b5' ]
+const onDarkColors = [ '#fa5252', '#fab005', '#40c057', '#228be6', '#be4bdb' ]
 ---
 
 <span class={`colored-title ${onDark ? 'on-dark' : ''}`}><span>Putting</span>{' '}<span>the</span>{' '}<span>&ldquo;You&rdquo;</span>{' '}<span>in</span>{' '}<span>CPU</span></span>
+
+<style define:vars={{
+	onDark0: onDarkColors[0],
+	onDark1: onDarkColors[1],
+	onDark2: onDarkColors[2],
+	onDark3: onDarkColors[3],
+	onDark4: onDarkColors[4],
+	onLight0: onLightColors[0],
+	onLight1: onLightColors[1],
+	onLight2: onLightColors[2],
+	onLight3: onLightColors[3],
+	onLight4: onLightColors[4],
+}}>
+	.colored-title {
+		& :nth-child(1) { color: var(--onLight0); }
+		& :nth-child(2) { color: var(--onLight1); }
+		& :nth-child(3) { color: var(--onLight2); }
+		& :nth-child(4) { color: var(--onLight3); }
+		& :nth-child(5) { color: var(--onLight4); }
+	}
+
+	.colored-title.on-dark {
+		& :nth-child(1) { color: var(--onDark0); }
+		& :nth-child(2) { color: var(--onDark1); }
+		& :nth-child(3) { color: var(--onDark2); }
+		& :nth-child(4) { color: var(--onDark3); }
+		& :nth-child(5) { color: var(--onDark4); }
+	}
+
+	@media print {
+		.colored-title, .colored-title.on-dark {
+			& :nth-child(1) { color: var(--onLight0); }
+			& :nth-child(2) { color: var(--onLight1); }
+			& :nth-child(3) { color: var(--onLight2); }
+			& :nth-child(4) { color: var(--onLight3); }
+			& :nth-child(5) { color: var(--onLight4); }
+		}
+	}
+</style>

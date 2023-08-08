@@ -1,0 +1,23 @@
+---
+import { JSDOM } from 'jsdom'
+
+const html = await Astro.slots.render('default')
+const dom = new JSDOM(html)
+
+// Downgrade all headings by one level
+for (let i = 5; i >= 1; i--) {
+	const headings = dom.window.document.querySelectorAll(`h${i}`)
+	for (const heading of headings) {
+		const newHeading = dom.window.document.createElement(`h${i + 1}`)
+		for (const attribute of heading.attributes) {
+			newHeading.setAttribute(attribute.name, attribute.value)
+		}
+		newHeading.innerHTML = heading.innerHTML
+		heading.replaceWith(newHeading)
+	}
+}
+
+const newHtml = dom.serialize()
+---
+
+<Fragment set:html={newHtml} />
