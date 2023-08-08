@@ -27,12 +27,6 @@ const rendered: [ CollectionEntry<'chapters'>, Awaited<Render['.mdx']> ][]
 </head>
 <body>
 	<header>
-		<p class='editions'>
-			<a href='/'>Home</a> &middot;
-			<strong>One-Pager</strong> &middot;
-			<a href='/editions/printable.pdf'>PDF</a> <!--&middot;
-			<a href='/editions/book.epub'>EPUB</a>-->
-		</p>
 		<div class='content'>
 			<h1><ColoredTitle onDark /></h1>
 			<p class='byline'>
@@ -43,7 +37,15 @@ const rendered: [ CollectionEntry<'chapters'>, Awaited<Render['.mdx']> ][]
 				&middot;
 				July, 2023
 			</p>
-			<p class='edition-note'>This one-pager edition is provided primarily for offline reading, such as when riding public transit.</p>
+		</div>
+		<div class='editions'>
+			<div class='label'>Special Editions</div>
+			<div>
+				<a href='/'>Normal</a> &middot;
+				<strong>One-Pager</strong> &middot;
+				<a href='/editions/printable.pdf'>PDF</a> <!--&middot;
+				<a href='/editions/book.epub'>EPUB</a>-->
+			</div>
 		</div>
 		<img src='/squiggles/print.svg' class='cover-bg' />
 	</header>

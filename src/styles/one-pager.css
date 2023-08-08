@@ -22,8 +22,8 @@ header {
 	flex-direction: column;
 	align-items: center;
 	color: #ced4da;
-	padding-top: 30px;
-	padding-bottom: 30px;
+	padding: 100px 0;
+	position: relative;
 
 	& p {
 		margin: 0;
@@ -32,12 +32,28 @@ header {
 	& .editions {
 		background: #343a40;
 		width: fit-content;
-		padding: 6px 22px;
-		height: 2.6em;
-		border-radius: 1.3em;
+		padding: 6px 30px;
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		justify-content: center;
+		height: 4.4em;
+		position: absolute;
+		top: calc(100% - 2.2em);
+		border-radius: 2.2em;
+
+		& .label {
+			font-size: 0.9em;
+			color: #868e96;
+			line-height: 1.2;
+		}
 
 		& a {
 			margin: 0; /* on firefox, the negative margin breaks layout with fit-content */
+		}
+
+		& strong {
+			color: #dee2e6;
 		}
 	}
 
@@ -46,19 +62,12 @@ header {
 		font-size: 2.5em;
 		font-weight: 600;
 		margin: 0;
-		margin-top: 80px;
 		margin-bottom: 14px;
 	}
 
 	& .content p {
 		line-height: 1.7;
 		font-size: 1.05em;
-	}
-
-	& .content .edition-note {
-		margin-top: 80px; /* hacky and bad? */
-		font-size: 0.95em;
-		color: #868e96;
 	}
 
 	& a, & a:not([href^="#"]):visited {
@@ -96,23 +105,21 @@ h2:first-of-type {
 @media print {
 	header {
 		background: transparent;
+		padding: 0;
+		position: static;
 
 		& .editions {
 			display: none;
 		}
 
 		& h1 {
-			margin-top: 29.5vh;
+			margin-top: 32vh;
 			font-size: 3.25em;
 		}
 
 		& .byline {
-			font-size: 1.25em;
+			font-size: 1.5em;
 			color: #000000;
-		}
-
-		& .edition-note {
-			display: none;
 		}
 
 		& a {
