@@ -97,7 +97,7 @@ $ sudo kill 1
 
 The init process is responsible for spawning all of the programs and services that make up your operating system. Many of those, in turn, spawn their own services and programs.
 
-<img src='/images/init-process-tree.png' loading='lazy' style='max-width: 580px; margin: 0 auto;' alt='A tree of processes. The root node is labeled "init." All child nodes are unlabeled but implied to be spawned by the init process.' width='1400' height='752' />
+<img src='/images/init-process-tree.png' loading='eager' style='max-width: 580px; margin: 0 auto;' alt='A tree of processes. The root node is labeled "init." All child nodes are unlabeled but implied to be spawned by the init process.' width='1400' height='752' />
 
 Killing the init process kills all of its children and all of their children, shutting down your OS environment.
 

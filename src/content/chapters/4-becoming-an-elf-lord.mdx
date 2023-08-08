@@ -11,7 +11,7 @@ import CodeBlock from '../../components/CodeBlock.astro'
 We pretty thoroughly understand `execve` now. At the end of most paths, the kernel will reach a final program containing machine code for it to launch. Typically, a setup process is required before actually jumping to the code — for example, different parts of the program have to be loaded into the right places in memory. Each program needs different amounts of memory for different things, so we have standard file formats that specify how to set up a program for execution. While Linux supports many such formats, the most common format by far is *ELF* (executable and linkable format).
 
 <p>
-	<img src='/images/gnu-linux-elf-drawing.jpg' loading='lazy' style='max-width: 260px; margin: 0 auto;' alt='A marker drawing on paper. A wizard elf is shown meditating, holding the head of a gnu in one hand and a Linux penguin in the other. The elf trails off, saying "Well, actually, Linux is just the kernel, the operating system is..." The drawing is captioned in red marker: "You&apos;ve heard of elf on a shelf! Now, get ready for... elf on a GNU/Linux." The drawing is signed "Nicky."' width='529' height='256' />
+	<img src='/images/gnu-linux-elf-drawing.jpg' loading='eager' style='max-width: 260px; margin: 0 auto;' alt='A marker drawing on paper. A wizard elf is shown meditating, holding the head of a gnu in one hand and a Linux penguin in the other. The elf trails off, saying "Well, actually, Linux is just the kernel, the operating system is..." The drawing is captioned in red marker: "You&apos;ve heard of elf on a shelf! Now, get ready for... elf on a GNU/Linux." The drawing is signed "Nicky."' width='529' height='256' />
 </p>
 <div style='text-align: center;'>
 	<p style='margin-top: -10px;'>

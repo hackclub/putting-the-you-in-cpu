@@ -149,11 +149,6 @@ h1 {
 	}
 }
 
-@page { 
-    size: auto;
-    margin: 0.8in 1.2in;
-}
-
 @media print {
 	:root {
 		--toc-width: 0px;

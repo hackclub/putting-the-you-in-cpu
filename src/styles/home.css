@@ -98,11 +98,6 @@ h2 {
 	margin-top: 80px;
 }
 
-@page { 
-    size: auto;
-    margin: 0.8in 1.2in;
-}
-
 @media print {
 	html, main {
 		background: #ffffff;
