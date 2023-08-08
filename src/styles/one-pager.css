@@ -17,6 +17,8 @@
 
 header {
 	background: #212529;
+	background: linear-gradient(90deg, #212529 28px, transparent 1%) center, linear-gradient(#212529 28px, transparent 1%) center, #495057;
+    background-size: 30px 30px;
 	text-align: center;
 	display: flex;
 	flex-direction: column;

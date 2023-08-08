@@ -340,8 +340,6 @@ nav.external {
 	html {
 		background: #ffffff;
 		font-size: 0.9em;
-		orphans: 2;
-		widows: 2;
 	}
 
 	.orpheus-flag, nav.external, .scroll-padding, .edit-button, .continue {
@@ -352,18 +350,30 @@ nav.external {
 		max-width: none;
 	}
 
+	h1, h2, h3, h4, h5, h6 {
+		page-break-after: avoid;
+		page-break-inside: avoid;
+	}
+
+	p {
+		orphans: 2;
+		widows: 2;
+	}
+
 	blockquote {
 		background: none;
 		border-left: 3px solid #adb5bd;
 		padding: 0 8px;
 		padding-left: 20px;
+		page-break-inside: avoid;
 	}
 
 	code {
-		color: #8f310c;
+		color: #000000;
 	}
 
 	code:not(pre code) {
+		color: #8f310c;
 		background: none;
 		padding: 0;
 		border-radius: 0;
