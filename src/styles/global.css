@@ -331,10 +331,17 @@ nav.external {
 	}
 }
 
+@page { 
+    size: auto;
+    margin: 0.8in;
+}
+
 @media print {
 	html {
 		background: #ffffff;
-		font-size: 1.2em;
+		font-size: 0.9em;
+		orphans: 2;
+		widows: 2;
 	}
 
 	.orpheus-flag, nav.external, .scroll-padding, .edit-button, .continue {
@@ -347,8 +354,8 @@ nav.external {
 
 	blockquote {
 		background: none;
-		border-left: 4px solid #adb5bd;
-		padding: 0 10px;
+		border-left: 3px solid #adb5bd;
+		padding: 0 8px;
 		padding-left: 20px;
 	}
 
@@ -364,6 +371,14 @@ nav.external {
 	
 	pre span {
 		color: inherit !important;
+	}
+
+	h2 {
+		margin-top: 50px;
+	}
+
+	hr {
+		background: #ced4da;
 	}
 
 	a {

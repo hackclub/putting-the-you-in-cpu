@@ -16,7 +16,7 @@ But how do you take control back from program code to switch processes? After a 
 
 Earlier, we talked about how software interrupts are used to hand control from a userland program to the OS. These are called “software” interrupts because they’re voluntarily triggered by a program — machine code executed by the processor in the normal fetch-execute cycle tells it to switch control to the kernel.
 
-<img src='/images/keyboard-hardware-interrupt.png' loading='lazy' style='max-width: 500px; margin: 0 auto;' alt='A drawing illustrating how hardware interrupts break normal execution. On top: a drawing of a keyboard with a highlighted key, with a lightning bolt drawn to a CPU on the right. On the bottom: some binary labeled "program code," a similar lightning bolt, and some more binary labeled "kernel code." The lightning bolt is labeled "interrupt triggers context switch."' width='935' height='503' />
+<img src='/images/keyboard-hardware-interrupt.png' loading='eager' style='max-width: 500px; margin: 0 auto;' alt='A drawing illustrating how hardware interrupts break normal execution. On top: a drawing of a keyboard with a highlighted key, with a lightning bolt drawn to a CPU on the right. On the bottom: some binary labeled "program code," a similar lightning bolt, and some more binary labeled "kernel code." The lightning bolt is labeled "interrupt triggers context switch."' width='935' height='503' />
 
 OS schedulers use *timer chips* like [PITs](https://en.wikipedia.org/wiki/Programmable_interval_timer) to trigger hardware interrupts for multitasking:
 
