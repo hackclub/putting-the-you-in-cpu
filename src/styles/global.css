@@ -2,8 +2,9 @@
 	--font-serif: 'IBM Plex Serif', serif;
 	--font-sans: 'IBM Plex Sans', sans-serif;
 	--font-mono: 'IBM Plex Mono', monospace;
+	--font-main-title: 'Phantom Sans', 'IBM Plex Serif', serif;
 
-	--toc-width: 0;
+	--toc-width: 0px;
 }
 
 * {
@@ -142,12 +143,20 @@ hr {
 		margin: 6px 0;
 	}
 
-	& p:not(:first-child) {
+	& p:not(:first-child):not(:last-child) {
 		font-style: italic;
 	}
 
 	& a {
 		--color: #b197fc;
+	}
+
+	& a:not([href^="#"]):visited {
+		--color: #da77f2;
+	}
+
+	& hr {
+		margin: 16px 0;
 	}
 }
 
@@ -226,7 +235,7 @@ nav.external {
 		}
 	}
 
-	& a {
+	& a, & a:not([href^=\#]):visited {
 		--color: currentColor;
 		--hover-background: #dee2e6;
 		display: block;
@@ -273,20 +282,6 @@ nav.external {
 	}
 }
 
-.colored-title {
-	& :nth-child(1) { color: #e03131; }
-	& :nth-child(2) { color: #f59f00; }
-	& :nth-child(3) { color: #2f9e44; }
-	& :nth-child(4) { color: #1971c2; }
-	& :nth-child(5) { color: #9c36b5; }
-
-	& .on-dark:nth-child(1) { color: #fa5252; }
-	& .on-dark:nth-child(2) { color: #fab005; }
-	& .on-dark:nth-child(3) { color: #40c057; }
-	& .on-dark:nth-child(4) { color: #228be6; }
-	& .on-dark:nth-child(5) { color: #be4bdb; }
-}
-
 @media (max-width: 720px) {
 	.old-nav {
 		display: block;
@@ -307,17 +302,42 @@ nav.external {
 	background: #adb5bd9b;
 }
 
+.orpheus-flag {
+	position: absolute;
+	top: 0;
+	left: 20px;
+	display: block;
+	width: 140px;
+	transform-origin: top left;
+	z-index: 999;
+
+	& img {
+		width: 100%;
+	}
+
+	&:hover {
+		background: none;
+		animation: orpheus-flag-wave 0.5s linear infinite alternate;
+	}
+}
+
+@keyframes orpheus-flag-wave {
+	0% {
+		transform: rotate(0deg);
+	}
+	
+	100% {
+		transform: rotate(-5deg);
+	}
+}
+
 @media print {
 	html {
 		background: #ffffff;
 		font-size: 1.2em;
 	}
 
-	body {
-		margin: 60px 100px;
-	}
-
-	nav.external, .scroll-padding, .edit-button, .continue {
+	.orpheus-flag, nav.external, .scroll-padding, .edit-button, .continue {
 		display: none;
 	}
 
@@ -327,20 +347,42 @@ nav.external {
 
 	blockquote {
 		background: none;
-		border-left: 4px solid #868e96;
+		border-left: 4px solid #adb5bd;
 		padding: 0 10px;
 		padding-left: 20px;
+	}
+
+	code {
+		color: #8f310c;
+	}
+
+	code:not(pre code) {
+		background: none;
+		padding: 0;
+		border-radius: 0;
+	}
+	
+	pre span {
+		color: inherit !important;
 	}
 
 	a {
 		text-decoration: underline;
 	}
 
-	.colored-title {
-		& :nth-child(1) { color: #e03131; }
-		& :nth-child(2) { color: #f59f00; }
-		& :nth-child(3) { color: #2f9e44; }
-		& :nth-child(4) { color: #1971c2; }
-		& :nth-child(5) { color: #9c36b5; }
+	a[href^=\#], a[href^=\/] {
+		text-decoration: none;
+		font-weight: bold;
+		color: #000000;
+
+		&::before {
+			content: "[";
+			color: #495057;
+		}
+
+		&::after {
+			content: "]";
+			color: #495057;
+		}
 	}
 }

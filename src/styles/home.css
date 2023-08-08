@@ -13,35 +13,6 @@ html {
 	background: #212529;
 }
 
-.orpheus-flag {
-	position: absolute;
-	top: 0;
-	left: 20px;
-	display: block;
-	width: 140px;
-	transform-origin: top left;
-	z-index: 999;
-
-	& img {
-		width: 100%;
-	}
-
-	&:hover {
-		background: none;
-		animation: orpheus-flag-wave 0.5s linear infinite alternate;
-	}
-}
-
-@keyframes orpheus-flag-wave {
-	0% {
-		transform: rotate(0deg);
-	}
-	
-	100% {
-		transform: rotate(-5deg);
-	}
-}
-
 header {
 	text-align: center;
 	width: 100%;
@@ -54,7 +25,7 @@ header {
 	color: #ced4da;
 
 	& h1 {
-		font-family: 'Phantom Sans', 'IBM Plex Serif', serif;
+		font-family: var(--font-main-title);
 		font-size: 2.5em;
 		font-weight: 600;
 		margin: 0;
@@ -71,7 +42,7 @@ header {
 		font-style: italic;
 	}
 
-	& a {
+	& a, & a:not([href^="#"]):visited {
 		--color: currentColor;
 		--hover-background: #343a40;
 		text-decoration: underline;
@@ -127,16 +98,22 @@ h2 {
 	margin-top: 80px;
 }
 
+@page { 
+    size: auto;
+    margin: 0.8in 1.2in;
+}
+
 @media print {
 	html, main {
 		background: #ffffff;
 	}
 
-	.orpheus-flag, header .squiggles {
+	header .squiggles {
 		display: none;
 	}
 
 	header {
+		background: transparent;
 		color: #000000;
 		padding: 20px;
 		margin-bottom: -40px;

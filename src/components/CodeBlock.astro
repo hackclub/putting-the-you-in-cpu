@@ -49,7 +49,7 @@ const lineNumbers = theme.colors['editorLineNumber.foreground']
 	figcaption {
 		font-size: 0.9em;
 		color: var(--foreground);
-		font-family: 'IBM Plex Sans', sans-serif;
+		font-family: var(--font-sans);
 
 		& a {
 			text-decoration: dotted underline;
@@ -91,5 +91,28 @@ const lineNumbers = theme.colors['editorLineNumber.foreground']
 
 	figure :global(pre):not(.line-numbers) {
 		flex: 1;
+	}
+
+	@media print {
+		figure, .pre-container, .pre-container :global(.astro-code) {
+			background: none !important;
+		}
+
+		figure {
+			border: 2px solid #ced4da;
+		}
+
+		.line-numbers code {
+			color: #868e96;
+		}
+
+		figcaption {
+			font-family: var(--font-serif);
+			color: #495057;
+
+			& a {
+				text-decoration: none;
+			}
+		}
 	}
 </style>

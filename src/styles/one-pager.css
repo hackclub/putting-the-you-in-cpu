@@ -1,0 +1,162 @@
+/* honestly all these styles are a bit of a clusterfuck */
+
+@font-face {
+	font-family: 'Phantom Sans';
+	src: url('https://assets.hackclub.com/fonts/Phantom_Sans_0.7/SemiBold.woff')
+		format('woff'),
+		url('https://assets.hackclub.com/fonts/Phantom_Sans_0.7/SemiBold.woff2')
+		format('woff2');
+	font-weight: 600;
+	font-style: normal;
+	font-display: swap;
+}
+
+.cover-bg {
+	display: none;
+}
+
+header {
+	background: #212529;
+	text-align: center;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	color: #ced4da;
+	padding-top: 30px;
+	padding-bottom: 30px;
+
+	& p {
+		margin: 0;
+	}
+
+	& .editions {
+		background: #343a40;
+		width: fit-content;
+		padding: 6px 22px;
+		height: 2.6em;
+		border-radius: 1.3em;
+
+		& a {
+			margin: 0; /* on firefox, the negative margin breaks layout with fit-content */
+		}
+	}
+
+	& h1 {
+		font-family: var(--font-main-title);
+		font-size: 2.5em;
+		font-weight: 600;
+		margin: 0;
+		margin-top: 80px;
+		margin-bottom: 14px;
+	}
+
+	& .content p {
+		line-height: 1.7;
+		font-size: 1.05em;
+	}
+
+	& .content .edition-note {
+		margin-top: 80px; /* hacky and bad? */
+		font-size: 0.95em;
+		color: #868e96;
+	}
+
+	& a, & a:not([href^="#"]):visited {
+		--color: currentColor;
+		--hover-background: #343a40;
+		text-decoration: underline;
+		text-decoration-color: #9775fa;
+		text-underline-offset: 4px;
+	}
+
+	& .editions a, & .editions a:not([href^="#"]):visited {
+		--hover-background: #495057;
+	}
+}
+
+main {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+}
+
+h2 {
+	margin-top: 140px;
+}
+
+h2:first-of-type {
+	margin-top: 80px;
+}
+
+@page { 
+    size: auto;
+    margin: 0.8in 0in;
+}
+
+@media print {
+	header {
+		background: transparent;
+
+		& .editions {
+			display: none;
+		}
+
+		& h1 {
+			margin-top: 32vh;
+			font-size: 3.25em;
+		}
+
+		& .byline {
+			font-size: 1.25em;
+			color: #000000;
+		}
+
+		& .edition-note {
+			display: none;
+		}
+
+		& a {
+			text-decoration: none;
+		}
+	}
+
+	.cover-bg {
+		--v-margin: 0in;
+		--h-margin: 1in;
+		display: block;
+		position: absolute;
+		top: var(--v-margin);
+		left: var(--h-margin);
+		width: calc(100% - var(--h-margin) * 2);
+		height: calc(100% - var(--v-margin) * 2);
+		z-index: -1;
+		opacity: 0.75;
+	}
+
+	h2 {
+		margin-top: 0;
+		font-size: 2em;
+		margin-bottom: 35px;
+		text-align: center;
+		page-break-before: always;
+		page-break-after: avoid;
+		page-break-inside: avoid;
+	}
+
+	h3 {
+		font-size: 1.6em;
+		margin-bottom: 20px;
+	}
+
+	h4 {
+		font-size: 1.3em;
+		margin-bottom: 15px;
+	}
+
+	.content {
+		/* All widths are calculated based on first-page margins, so our content gets
+		 * cut off if we do layout with normal @page rules. Instead, we use 0in margin
+		 * in the @page and add in our 1.2in horizontal margin here. */
+		max-width: calc(100% - 2.4in);
+	}
+}
