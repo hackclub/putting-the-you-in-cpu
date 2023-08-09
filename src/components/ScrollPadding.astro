@@ -1,3 +1,11 @@
+---
+export interface Props {
+	hideEditions?: boolean
+}
+
+const { hideEditions } = Astro.props
+---
+
 <footer class='scroll-padding'>
 	<div class='content'>
 		<p>[This Space Intentionally Left Blank]</p>
@@ -7,12 +15,14 @@
 				Open source with ❤︎ on GitHub
 			</a>
 		</p>
-		<hr />
-		<p>
-			Other editions:
-			<a href='/editions/one-pager'>One-Pager</a> &middot;
-			<a href='/editions/printable.pdf'>PDF</a><!--  &middot;
-			<a href='/editions/book.epub'>EPUB</a> -->
-		</p>
+		{hideEditions ? null : <>
+			<hr />
+			<p>
+				Other editions:
+				<a href='/editions/one-pager'>One-Pager</a> &middot;
+				<a href='/editions/printable.pdf'>PDF</a><!--  &middot;
+				<a href='/editions/book.epub'>EPUB</a> -->
+			</p>
+		</>}
 	</div>
 </footer>
