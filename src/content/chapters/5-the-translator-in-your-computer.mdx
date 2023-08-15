@@ -3,7 +3,7 @@ chapter: 5
 title: The Translator in Your Computer
 shortname: Paging
 slug: the-translator-in-your-computer
-updatedAt: 2023-07-18T19:11:40.117Z
+updatedAt: 2023-08-15T18:49:01.686Z
 ---
 
 import CodeBlock from '../../components/CodeBlock.astro'
@@ -18,13 +18,19 @@ We're nearing the end of our journey. After these two questions are answered, we
 
 So... about memory. It turns out that when the CPU reads from or writes to a memory address, it's not actually referring to that location in *physical* memory (RAM). Rather, it's pointing to a location in *virtual* memory space.
  
-The CPU talks to a chip called a [*memory management unit*](https://en.wikipedia.org/wiki/Memory_management_unit) (MMU). The MMU works like a translator with a dictionary that translates locations in virtual memory to locations in RAM. When the CPU is given an instruction to read from memory address `0xAD4DA83F`, it asks the MMU to translate that address. The MMU looks it up in the dictionary, discovers that the matching physical address is `0x70B7BC3F`, and sends the number back to the CPU. The CPU can then read from that address in RAM.
+The CPU talks to a chip called a [*memory management unit*](https://en.wikipedia.org/wiki/Memory_management_unit) (MMU). The MMU works like a translator with a dictionary that translates locations in virtual memory to locations in RAM. When the CPU is given an instruction to read from memory address `0xfffaf54834067fe2`, it asks the MMU to translate that address. The MMU looks it up in the dictionary, discovers that the matching physical address is `0x53a4b64a90179fe2`, and sends the number back to the CPU. The CPU can then read from that address in RAM.
 
-<img src='/images/virtual-memory-mmu-example.png' loading='eager' style='max-width: 640px; margin: 0 auto;' alt='A drawing of a smiling CPU and an MMU having a conversation. The MMU is a tall chip, wearing library glasses, and holding a large book labeled "Dictionary: Pointers 0x0000 to 0xffff." The CPU asks the MMU to translate a long memory address starting with 0xfffa. The MMU thinks for a second, and responds with a different pointer starting with 0x52a4.' width='1207' height='454' />
+<img src='/images/virtual-memory-mmu-example.png' loading='eager' style='max-width: 640px; margin: 0 auto;' alt='A drawing of a smiling CPU and an MMU having a conversation. The MMU is a tall chip, wearing library glasses, and holding a large book labeled "Dictionary: Pointers 0x0000 to 0xffff." The CPU asks the MMU to translate a long memory address. The MMU thinks for a second, and responds with a different pointer.' width='1207' height='454' />
 
 When the computer first boots up, memory accesses go directly to physical RAM. Immediately after startup, the OS creates the translation dictionary and tells the CPU to start using the MMU.
 
-This dictionary is actually called a *page table*, and this system of translating every memory access is called *paging*. Entries in the page table are called *pages* and each one represents how a certain chunk of virtual memory maps to RAM. These chunks are always a fixed size, and each processor architecture has a different page size. x86-64 has a default 4 KiB page size, meaning each page specifies the mapping for a block of memory 4,096 bytes long. In the example above this means that the bottom 12 bits will always be the same before and after MMU translation. (x86-64 also allows operating systems to enable larger 2 MiB or 4 GiB pages, which can improve address translation speed but increase memory fragmentation and waste.)
+This dictionary is actually called a *page table*, and this system of translating every memory access is called *paging*. Entries in the page table are called *pages* and each one represents how a certain chunk of virtual memory maps to RAM. These chunks are always a fixed size, and each processor architecture has a different page size. x86-64 has a default 4 KiB page size, meaning each page specifies the mapping for a block of memory 4,096 bytes long.
+
+In other words, with 4 KiB pages the bottom 12 bits of an address will always be the same before and after MMU translation — 12, because that's the amount of bits needed to index the 4,096-byte page you get post-translation.
+
+x86-64 also allows operating systems to enable larger 2 MiB or 4 GiB pages, which can improve address translation speed but increase memory fragmentation and waste. The larger the chunk size, the more bits are needed to index the page, so the more bits stay the same before and after translation.
+
+<img src='/images/4kib-paging-address-breakdown.png' loading='lazy' style='max-width: 400px; margin: 0 auto;' alt='A breakdown of a memory address with 4 KiB paging. The lowest 12 bits index the page, and the rest of the bits are translated by the MMU and become the page&apos;s start address.' width='760' height='310' />
 
 The page table itself just resides in RAM. While it can contain millions of entries, each entry's size is only on the order of a couple bytes, so the page table doesn't take up too much space.
 
