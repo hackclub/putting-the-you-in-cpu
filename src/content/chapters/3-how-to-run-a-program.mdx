@@ -27,7 +27,7 @@ Let's start with a very important system call: `execve`. It loads a program and,
 > 
 > `execve` is *actually* built on top of `execveat`, a more general syscall that runs a program with some configuration options. For simplicity, we'll mostly talk about `execve`; the only difference is that it provides some defaults to `execveat`.
 >
-> Curious what `ve` stands for? The `v` means one parameter is the vector (list) of arguments (`argv`), and the `e` means another parameter is the vector of environment variables (`envp`). Various other exec syscalls have different suffices to designate different call signatures. The `at` in `execveat` is just "at", because it specifies the location to run `execve` at.
+> Curious what `ve` stands for? The `v` means one parameter is the vector (list) of arguments (`argv`), and the `e` means another parameter is the vector of environment variables (`envp`). Various other exec syscalls have different suffixes to designate different call signatures. The `at` in `execveat` is just "at", because it specifies the location to run `execve` at.
 
 The call signature of `execve` is:
 
