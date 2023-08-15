@@ -17,6 +17,7 @@ html {
 	font-family: var(--font-serif);
 	overflow-wrap: break-word;
 	line-height: 1.8;
+	-webkit-text-size-adjust: 100%;
 }
 
 body {
