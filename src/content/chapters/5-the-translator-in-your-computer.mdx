@@ -28,7 +28,7 @@ This dictionary is actually called a *page table*, and this system of translatin
 
 In other words, with 4 KiB pages the bottom 12 bits of an address will always be the same before and after MMU translation — 12, because that's the amount of bits needed to index the 4,096-byte page you get post-translation.
 
-x86-64 also allows operating systems to enable larger 2 MiB or 4 GiB pages, which can improve address translation speed but increase memory fragmentation and waste. The larger the chunk size, the more bits are needed to index the page, so the more bits stay the same before and after translation.
+x86-64 also allows operating systems to enable larger 2 MiB or 4 GiB pages, which can improve address translation speed but increase memory fragmentation and waste. The larger the page size, the smaller the portion of the address that's translated by the MMU.
 
 <img src='/images/4kib-paging-address-breakdown.png' loading='lazy' style='max-width: 400px; margin: 0 auto;' alt='A breakdown of a memory address with 4 KiB paging. The lowest 12 bits index the page, and the rest of the bits are translated by the MMU and become the page&apos;s start address.' width='760' height='310' />
 
