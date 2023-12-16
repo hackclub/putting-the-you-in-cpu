@@ -280,7 +280,7 @@ So, why does the shell script run as a shell script? The kernel's format handler
 
 Well, it turns out that this behavior isn't part of the kernel. It's actually a common way for your *shell* to handle a failure case.
 
-When you execute a file using a shell and the exec syscall fails, most shells will *retry executing the file as a shell script* by executing a shell with the filename as the first argument. Bash will typically use itself as this interpreter, while ZSH uses whatever `sh` is, usually [Bourne shell](https://en.wikipedia.org/wiki/Bourne_shell).
+When you execute a file using a shell and the exec syscall fails, most shells will *retry executing the file as a shell script* by executing a shell with the filename as the first argument. Bash will typically use itself as the interpreter, while ZSH uses whatever `sh` is, usually [Bourne shell](https://en.wikipedia.org/wiki/Bourne_shell).
 
 This behavior is so common because it's specified in [*POSIX*](https://en.wikipedia.org/wiki/POSIX), an old standard designed to make code portable between Unix systems. While POSIX isn't strictly followed by most tools or operating systems, many of its conventions are still shared.
 
