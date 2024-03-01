@@ -22,7 +22,7 @@ The "instructions" that CPUs execute are just binary data: a byte or two to repr
 
 > An aside: instructions aren't always represented 1:1 in machine code as in the above example. For example, `add eax, 512` translates to `05 00 02 00 00`.
 > 
-> The first byte (`05`) is an opcode specifically representing *adding the EAX register to a 32-bit number*. The remaining bytes are 512 (`0x200`) in [little-endian](https://en.wikipedia.org/wiki/Endianness) byte order.
+> The first byte (`05`) is an opcode specifically representing *adding a 32-bit number to the EAX register*. The remaining bytes are 512 (`0x200`) in [little-endian](https://en.wikipedia.org/wiki/Endianness) byte order.
 >
 > Defuse Security created [a helpful tool](https://defuse.ca/online-x86-assembler.htm) for playing around with the translation between assembly and machine code.
 
