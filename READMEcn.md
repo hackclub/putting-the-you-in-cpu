@@ -1,0 +1,27 @@
+<picture>
+  <source media='(prefers-color-scheme: dark)' srcset='./public/github-images/banner-dark.png'>
+  <img src='./public/github-images/banner-light.png' alt=''>
+</picture>
+
+<h1 align='center'>CPU里的“你”</h1>
+<p align='center'>一篇技术性解说文章，讲述电脑从头到尾运行程序的全过程</p>
+<p align='center'>by <a href='https://github.com/kognise'>@kognise</a> and <a href='https://github.com/hackclub'>@hackclub</a> | 汉化：<a href='https://github.com/LINMOH'>@Lin Mohan</a></p>
+<br>
+
+## 从头开始……
+
+我用电脑做了[很多项目](https://github.com/kognise), 但是我经常困惑: 当你在电脑上运行程序时，到底发生了什么？我思来想去——虽然我已经掌握了大部分计算机底层的知识，但我却不能把他们联系起来。程序真的直接在 CPU 上执行吗？还是实际上有别的机制在起作用呢？我用过系统调用（syscall），但他们到底是怎样工作的？本质上又是什么？多个程序又是如何同时运行的呢？
+
+<img src='/public/images/writing-this-article.png' alt='一幅随意的数码手绘：一个长发女困惑地盯着电脑，看着二进制数据被吃掉。突然，他灵光一闪！于是，他坐在不太正的台式电脑前开始查资料研究起来。' width='700' />
+
+我下定决心，把这一切尽可能弄明白。由于没有上大学，能找到的系统、全面的资料很少。所以我不得不从各种质量参差不齐、甚至还相互矛盾的资料中筛选信息。几周研究，做了近四十页笔记，我觉得我理解了电脑开机和运行程序的过程。我想，如果有这么一篇文章，可以系统地解释这些知识，那么，我就不用费这么多力气了。所以，我决定写这么一篇文章。
+
+并且，《礼记》中写到，“教学相长”，我何乐而不为呢？
+
+> 如果你时间紧，或者以为自己已经掌握了这些内容，
+>
+> 不妨看看第三章，我敢保证你一定会学到新知识——除非你真的是 Linus 本人。
+
+<br>
+
+<p align='center'><a href='https://cpu.land/the-basics'><strong>阅读《第一章: 基础知识》&raquo;</strong><br>(cpu.land)</a></p>
