@@ -124,7 +124,7 @@ The first major job of `do_execveat_common` is setting up a struct called `linux
 - `filename` and `interp` store the filename of the program and its interpreter, respectively. These start out equal to each other, but can change in some cases: one such case is when running interpreted scripts with a [shebang](https://en.wikipedia.org/wiki/Shebang_(Unix)). When executing a Python program, for example, `filename` points to the source file but `interp` is the path to the Python interpreter.
 - `buf` is an array filled with the first 256 bytes of the file to be executed. It's used to detect the format of the file and load script shebangs.
 
-(TIL: binprm stands for **bin**ary **pr**og**r**a**m**.)
+(TIL: binprm stands for **bin**ary **pr**ogra**m**.)
 
 Let's take a closer look at this buffer `buf`:
 
