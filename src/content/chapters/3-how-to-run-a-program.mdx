@@ -199,7 +199,7 @@ During my research, I read an article that described the buffer as 128 bytes lon
 
 COMPUTERS ARE SO COOL!
 
-Since shebangs are handled by the kernel, and pull from `buf` instead of loading the whole file, they're *always* truncated to the length of `buf`. Apparently, 4 years ago, someone got annoyed by the kernel truncating their >128-character paths, and their solution was to double the truncation point by doubling the buffer size! Today, on your very own Linux machine, if you have a shebang line more than 256 characters long, everything past 256 characters will be *completely lost*.
+Since shebangs are handled by the kernel, and pulled from `buf` instead of loading the whole file, they're *always* truncated to the length of `buf`. Apparently, 4 years ago, someone got annoyed by the kernel truncating their >128-character paths, and their solution was to double the truncation point by doubling the buffer size! Today, on your very own Linux machine, if you have a shebang line more than 256 characters long, everything past 256 characters will be *completely lost*.
 
 <img src='/images/linux-shebang-truncation.png' loading='lazy' style='max-width: 500px;' alt='A diagram depicting shebang truncation. A large array of bytes from a file named file.bin. The first 256 bytes are highlighted and labeled "Loaded into buf," while the remaining bytes are translucent and labeled "Ignored, past 256 bytes."' width='730' height='548' />
 
