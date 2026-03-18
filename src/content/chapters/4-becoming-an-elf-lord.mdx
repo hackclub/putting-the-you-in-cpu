@@ -53,7 +53,7 @@ Every ELF file has an [ELF header](https://refspecs.linuxfoundation.org/elf/gabi
 - Whether the binary is meant to be run on its own as an executable, or whether it's meant to be loaded by other programs as a "dynamically linked library." We'll go into details about what dynamic linking is soon.
 - The entry point of the executable. Later sections specify exactly where to load data contained in the ELF file into memory. The entry point is a memory address pointing to where the first machine code instruction is in memory after the entire process has been loaded.
 
-The ELF header is always at the start of the file. It specifies the locations of the program header table and section header, which can be anywhere within the file. Those tables, in turn, point to data stored elsewhere in the file.
+The ELF header is always at the start of the file. It specifies the locations of the program header table and section header table, which can be anywhere within the file. Those tables, in turn, point to data stored elsewhere in the file.
 
 ### Program Header Table
 
