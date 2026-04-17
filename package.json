@@ -11,7 +11,7 @@
 	"devDependencies": {
 		"@astrojs/mdx": "^0.18.2",
 		"@astrojs/sitemap": "^1.2.1",
-		"@astrojs/vercel": "^3.2.1",
+		"@astrojs/vercel": "^10.0.2",
 		"@types/jsdom": "^21.1.1",
 		"astro": "^2.1.8",
 		"jsdom": "^22.1.0",
