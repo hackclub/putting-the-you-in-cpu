@@ -1,12 +1,12 @@
 ---
-import { getEntryBySlug, CollectionEntry } from 'astro:content'
+import { getEntry, type CollectionEntry } from 'astro:content'
 
 interface Props {
-	chapterSlug: CollectionEntry<'chapters'>['slug']
+	chapterSlug: CollectionEntry<'chapters'>['id']
 }
 
 const { chapterSlug } = Astro.props
-const chapter = await getEntryBySlug('chapters', chapterSlug)
+const chapter = (await getEntry('chapters', chapterSlug))!
 
 const bannerUrl = new URL('/banner.png', Astro.site)
 const bannerAlt = ''

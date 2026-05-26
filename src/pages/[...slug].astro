@@ -2,7 +2,7 @@
 import '../styles/global.css'
 import '../styles/chapter.css'
 
-import { CollectionEntry, getCollection, getEntryBySlug } from 'astro:content'
+import { type CollectionEntry, getCollection, getEntry, render } from 'astro:content'
 import TOCList from '../components/TOCList.astro'
 import SEO from '../components/SEO.astro'
 import ExternalNav from '../components/ExternalNav.astro'
@@ -12,23 +12,23 @@ import ScrollPadding from '../components/ScrollPadding.astro'
 import OldNav from '../components/OldNav.astro'
 
 export interface Params {
-	slug: CollectionEntry<'chapters'>['slug']
+	slug: CollectionEntry<'chapters'>['id']
 }
 
-const chapter = await getEntryBySlug('chapters', Astro.params.slug)
-const { Content, headings } = await chapter.render()
+const chapter = await getEntry('chapters', Astro.params.slug as string)
+const { Content, headings } = await render(chapter!)
 
 const allChapters = await getCollection('chapters')
 const prevChapter = allChapters
-	.find(otherChapter => otherChapter.data.chapter === chapter.data.chapter - 1)
+	.find(otherChapter => otherChapter.data.chapter === chapter!.data.chapter - 1)
 const nextChapter = allChapters
-	.find(otherChapter => otherChapter.data.chapter === chapter.data.chapter + 1)
+	.find(otherChapter => otherChapter.data.chapter === chapter!.data.chapter + 1)
 
 export async function getStaticPaths() {
 	const chapters = await getCollection('chapters')
 	return chapters
 		.filter(chapter => chapter.data.chapter !== 0) // Skip the intro
-		.map(chapter => ({ params: { slug: chapter.slug } }))
+		.map(chapter => ({ params: { slug: chapter.id } }))
 }
 ---
 
@@ -41,11 +41,11 @@ export async function getStaticPaths() {
 	<link rel='preconnect' href='https://fonts.gstatic.com' crossorigin />
 	<link href='https://fonts.googleapis.com/css2?family=IBM+Plex+Mono&family=IBM+Plex+Sans:wght@400;700&family=IBM+Plex+Serif:ital,wght@0,400;0,700;1,400;1,700&display=swap' rel='stylesheet' />
 
-	<SEO chapterSlug={chapter.slug} />
+	<SEO chapterSlug={chapter!.id} />
 	<script defer data-domain='cpu.land' src='https://plausible.io/js/script.js' />
 </head>
 <body>
-	<ExternalNav currentChapterSlug={chapter.slug} />
+	<ExternalNav currentChapterSlug={chapter!.id} />
 
 	<nav class='internal'>
 		<h2>Chapter Contents</h2>
@@ -57,14 +57,14 @@ export async function getStaticPaths() {
 
 		<div class='navigation'>
 			{prevChapter ? (
-				<a href={prevChapter.data.chapter === 0 ? '/' : prevChapter.slug}>
+				<a href={prevChapter.data.chapter === 0 ? '/' : prevChapter.id}>
 					<span aria-hidden='true'>&laquo;</span>
 					<span class='sr-only'>Previous:</span>
 					{prevChapter.data.chapter === 0 ? 'Intro' : `Chapter ${prevChapter.data.chapter}`}
 				</a>
 			) : null}
 			{nextChapter ? (
-				<a href={nextChapter.slug}>
+				<a href={nextChapter.id}>
 					<span class='sr-only'>Next:</span>
 					{nextChapter.data.chapter === 0 ? 'Intro' : `Chapter ${nextChapter.data.chapter}`}
 					<span aria-hidden='true'>&raquo;</span>
@@ -76,10 +76,10 @@ export async function getStaticPaths() {
 	<main>
 		<header class='content'>
 			<h1 id='intro'>
-				<div class='chapter'>Chapter {chapter.data.chapter}<span class='sr-only'>:</span></div>
+				<div class='chapter'>Chapter {chapter!.data.chapter}<span class='sr-only'>:</span></div>
 				<div class='title'>
-					{chapter.data.title}
-					<EditButton chapterSlug={chapter.slug} />
+					{chapter!.data.title}
+					<EditButton chapterSlug={chapter!.id} />
 				</div>
 			</h1>
 		</header>
@@ -87,7 +87,7 @@ export async function getStaticPaths() {
 		<div class='you-are-here'>
 			<div class='content'>
 				<p>Part of <a href='/' style='--color: transparent;'><ColoredTitle /></a>: a rabbit hole into how your computer runs programs.</p>
-				<OldNav chapterSlug={chapter.slug} />
+				<OldNav chapterSlug={chapter!.id} />
 			</div>
 		</div>
 
@@ -95,7 +95,7 @@ export async function getStaticPaths() {
 			<Content />
 
 			{nextChapter ? (
-				<a class='continue' href={nextChapter.slug}>
+				<a class='continue' href={nextChapter.id}>
 					Continue to Chapter {nextChapter.data.chapter}: {nextChapter.data.title} <span aria-hidden='true'>&raquo;</span>
 				</a>
 			) : null}

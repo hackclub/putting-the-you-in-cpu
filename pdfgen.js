@@ -1,7 +1,7 @@
 // TODO: Automate this!
-const puppeteer = require('puppeteer')
-const fs = require('fs/promises')
-const process = require('process')
+import puppeteer from 'puppeteer'
+import fs from 'node:fs/promises'
+import process from 'node:process'
 
 async function pdf(url) {
 	const browser = await puppeteer.launch({ headless: 'new' })

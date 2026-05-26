@@ -3,7 +3,7 @@ import mdx from '@astrojs/mdx'
 import sitemap from '@astrojs/sitemap'
 import rehypeExternalLinks from 'rehype-external-links'
 import rehypePresetMinify from 'rehype-preset-minify'
-import vercelStatic from '@astrojs/vercel/static'
+import vercel from '@astrojs/vercel'
 
 const rehypeExternalLinksConfig = [
 	rehypeExternalLinks,
@@ -14,7 +14,7 @@ export default defineConfig({
 	site: 'https://cpu.land/',
 	trailingSlash: 'never',
 	output: 'static',
-	adapter: vercelStatic(),
+	adapter: vercel(),
 	server: {
 		port: parseInt(process.env.PORT || '3000')
 	},

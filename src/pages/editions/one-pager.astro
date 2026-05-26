@@ -2,15 +2,16 @@
 import '../../styles/global.css'
 import '../../styles/one-pager.css'
 
-import { CollectionEntry, Render, getCollection } from 'astro:content'
+import { getCollection, render } from 'astro:content'
 import DowngradeHeadings from '../../components/DowngradeHeadings.astro'
 import ScrollPadding from '../../components/ScrollPadding.astro'
 import ColoredTitle from '../../components/ColoredTitle.astro'
 import { abstract } from '../../metadata'
 
 const chapters = await getCollection('chapters')
-const rendered: [ CollectionEntry<'chapters'>, Awaited<Render['.mdx']> ][]
-	= await Promise.all(chapters.map(async chapter => [ chapter, await chapter.render() ]))
+const rendered = await Promise.all(
+	chapters.map(async chapter => [ chapter, await render(chapter) ] as const)
+)
 ---
 
 <html lang='en'>
@@ -53,7 +54,7 @@ const rendered: [ CollectionEntry<'chapters'>, Awaited<Render['.mdx']> ][]
 	<main>
 		<div class='content'>
 			{rendered.map(([ chapter, { Content } ]) => <>
-				<h2 id={chapter.slug}>Chapter {chapter.data.chapter}: {chapter.data.title}</h2>
+				<h2 id={chapter.id}>Chapter {chapter.data.chapter}: {chapter.data.title}</h2>
 				<DowngradeHeadings>
 					<Content />
 				</DowngradeHeadings>
