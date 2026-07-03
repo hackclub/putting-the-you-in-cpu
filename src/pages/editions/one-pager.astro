@@ -8,7 +8,7 @@ import ScrollPadding from '../../components/ScrollPadding.astro'
 import ColoredTitle from '../../components/ColoredTitle.astro'
 import { abstract } from '../../metadata'
 
-const chapters = await getCollection('chapters')
+const chapters = (await getCollection('chapters')).sort((a, b) => a.data.chapter - b.data.chapter)
 const rendered = await Promise.all(
 	chapters.map(async chapter => [ chapter, await render(chapter) ] as const)
 )

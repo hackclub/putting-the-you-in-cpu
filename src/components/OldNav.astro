@@ -6,7 +6,7 @@ export interface Props {
 }
 
 const { chapterSlug } = Astro.props
-const allChapters = await getCollection('chapters')
+const allChapters = (await getCollection('chapters')).sort((a, b) => a.data.chapter - b.data.chapter)
 ---
 
 <details class='old-nav'>

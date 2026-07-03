@@ -18,7 +18,7 @@ export interface Params {
 const chapter = await getEntry('chapters', Astro.params.slug as string)
 const { Content, headings } = await render(chapter!)
 
-const allChapters = await getCollection('chapters')
+const allChapters = (await getCollection('chapters')).sort((a, b) => a.data.chapter - b.data.chapter)
 const prevChapter = allChapters
 	.find(otherChapter => otherChapter.data.chapter === chapter!.data.chapter - 1)
 const nextChapter = allChapters
