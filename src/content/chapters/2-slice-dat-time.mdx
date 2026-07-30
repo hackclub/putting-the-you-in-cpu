@@ -49,7 +49,7 @@ At the time of writing this article, Linux's scheduler uses a target latency of 
 
 Round-robin scheduling with this basic timeslice calculation is close to what most computers do nowadays. It's still a bit naive; most operating systems tend to have more complex schedulers which take process priorities and deadlines into account. Since 2007, Linux has used a scheduler called [Completely Fair Scheduler](https://docs.kernel.org/scheduler/sched-design-CFS.html). CFS does a bunch of very fancy computer science things to prioritize tasks and divvy up CPU time.
 
-Every time the OS preempts a process it needs to load the new program's saved execution context, including its memory environment. This is accomplished by telling the CPU to use a different *page table*, the mapping from "virtual" to physical addresses. This is also the system that prevents programs from accessing each other's memory; we'll go down this rabbit hole in chapters [5](/the-translator-in-your-computer) and [6](/lets-talk-about-forks-and-cows) of this article.
+Every time the OS preempts a process it needs to load the new program's saved execution context, including its memory environment. This is accomplished by telling the CPU to use a *page table*, a mapping from "virtual" to physical addresses. This is also how the OS prevents programs from accessing each other's memory; we'll go down this rabbit hole in chapters [5](/the-translator-in-your-computer) and [6](/lets-talk-about-forks-and-cows) of this article.
 
 ## Note #1: Kernel Preemptability
 
