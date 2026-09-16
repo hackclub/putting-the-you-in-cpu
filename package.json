@@ -11,15 +11,15 @@
 	},
 	"devDependencies": {
 		"@astrojs/mdx": "^5.0.6",
-		"@astrojs/sitemap": "^3.7.2",
-		"@astrojs/vercel": "^10.0.7",
+		"@astrojs/sitemap": "^3.7.4",
+		"@astrojs/vercel": "^10.0.8",
 		"@types/jsdom": "^28.0.3",
-		"astro": "^6.3.7",
+		"astro": "^6.4.8",
 		"jsdom": "^29.1.1",
-		"postcss-nesting": "^14.0.0",
-		"puppeteer": "^25.0.4",
+		"postcss-nesting": "^14.0.1",
+		"puppeteer": "^25.11.0",
 		"rehype-external-links": "^3.0.0",
 		"rehype-preset-minify": "^7.0.1",
-		"shiki": "^4.1.0"
+		"shiki": "^4.4.3"
 	}
 }
