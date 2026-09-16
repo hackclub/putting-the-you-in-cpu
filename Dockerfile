@@ -19,3 +19,6 @@ COPY --from=build --chown=65532:65532 /app/dist/ /usr/share/nginx/html/
 
 EXPOSE 80
 STOPSIGNAL SIGQUIT
+
+HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
+    CMD ["nginx", "-t", "-q"]
