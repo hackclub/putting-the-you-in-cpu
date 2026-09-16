@@ -57,14 +57,14 @@ export async function getStaticPaths() {
 
 		<div class='navigation'>
 			{prevChapter ? (
-				<a href={prevChapter.data.chapter === 0 ? '/' : prevChapter.id}>
+				<a href={prevChapter.data.chapter === 0 ? '/' : `/${prevChapter.id}/`}>
 					<span aria-hidden='true'>&laquo;</span>
 					<span class='sr-only'>Previous:</span>
 					{prevChapter.data.chapter === 0 ? 'Intro' : `Chapter ${prevChapter.data.chapter}`}
 				</a>
 			) : null}
 			{nextChapter ? (
-				<a href={nextChapter.id}>
+				<a href={`/${nextChapter.id}/`}>
 					<span class='sr-only'>Next:</span>
 					{nextChapter.data.chapter === 0 ? 'Intro' : `Chapter ${nextChapter.data.chapter}`}
 					<span aria-hidden='true'>&raquo;</span>
@@ -95,7 +95,7 @@ export async function getStaticPaths() {
 			<Content />
 
 			{nextChapter ? (
-				<a class='continue' href={nextChapter.id}>
+				<a class='continue' href={`/${nextChapter.id}/`}>
 					Continue to Chapter {nextChapter.data.chapter}: {nextChapter.data.title} <span aria-hidden='true'>&raquo;</span>
 				</a>
 			) : null}

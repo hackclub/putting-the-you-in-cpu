@@ -20,7 +20,7 @@ const allChapters = (await getCollection('chapters')).sort((a, b) => a.data.chap
 			.filter(chapter => chapter.data.chapter !== 0) // Skip the intro
 			.map(otherChapter => (
 				<li class={otherChapter.id === chapterSlug ? 'active' : ''}>
-					<a href={otherChapter.id} aria-current={otherChapter.id === chapterSlug ? 'page' : undefined}>
+					<a href={`/${otherChapter.id}/`} aria-current={otherChapter.id === chapterSlug ? 'page' : undefined}>
 						{otherChapter.data.title}
 					</a>
 				</li>

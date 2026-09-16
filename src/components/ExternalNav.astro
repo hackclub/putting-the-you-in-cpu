@@ -27,7 +27,7 @@ const currentChapter = (await getEntry('chapters', currentChapterSlug))!
 					style={`opacity: ${[0.7, 0.5, 0.4, 0.3][Math.abs(index - currentChapter.data.chapter)] ?? 0.2}`}
 				>
 					<a
-						href={chapter.data.chapter === 0 ? '/' : chapter.id}
+						href={chapter.data.chapter === 0 ? '/' : `/${chapter.id}/`}
 						aria-current={chapter.id === currentChapterSlug ? 'page' : undefined}
 					>
 						<div class='chapter'>Ch. {chapter.data.chapter}</div>
