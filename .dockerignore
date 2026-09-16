@@ -1,0 +1,17 @@
+.git
+.github
+.astro
+.vercel
+dist
+node_modules
+
+.env
+.env.*
+*.log
+.DS_Store
+
+Dockerfile
+README.md
+LICENSE
+pdfgen.js
+vercel.json
