@@ -58,7 +58,7 @@ For me, this raises more questions than it answers:
 2. If programs run directly on the CPU, and the CPU can directly access RAM, why can't code access memory from other processes, or, god forbid, the kernel?
 3. Speaking of which, what's the mechanism that prevents every process from running any instruction and doing anything to your computer? AND WHAT'S A DAMN SYSCALL?
 
-The question about memory deserves its own section and is covered in [chapter 5](/the-translator-in-your-computer) — the TL;DR is that most memory accesses actually go through a layer of misdirection that remaps the entire address space. For now, we're going to pretend that programs can access all RAM directly and computers can only run one process at once. We'll explain away both of these assumptions in time.
+The question about memory deserves its own section and is covered in [chapter 5](/the-translator-in-your-computer) — the TL;DR is that most memory accesses actually go through a layer of indirection that remaps the entire address space. For now, we're going to pretend that programs can access all RAM directly and computers can only run one process at once. We'll explain away both of these assumptions in time.
 
 It's time to leap through our first rabbit hole into a land filled with syscalls and security rings.
 
