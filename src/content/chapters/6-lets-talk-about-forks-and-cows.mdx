@@ -214,7 +214,7 @@ Now the kernel can find a suitable init program to run:
 
 On Linux, the init program is almost always located at or symbolic-linked to `/sbin/init`. Common inits include [systemd](https://systemd.io/) (which has an abnormally good website), [OpenRC](https://wiki.gentoo.org/wiki/OpenRC/openrc-init), and [runit](http://smarden.org/runit/). `kernel_init` will default to `/bin/sh` if it can't find anything else — and if it can't find `/bin/sh`, something is TERRIBLY wrong.
 
-*MacOS has an init program, too! It's called launchd and is located at `/sbin/launchd`. Try running that in a terminal to get yelled for not being a kernel.*
+*MacOS has an init program, too! It's called launchd and is located at `/sbin/launchd`. Try running that in a terminal to get yelled at for not being a kernel.*
 
 From this point on, we're at step 4 in the boot process: the init process is running in userland and begins launching various programs using the fork-exec pattern.
 
