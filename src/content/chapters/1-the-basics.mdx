@@ -44,7 +44,7 @@ Other registers are only used internally by the CPU, but can often be updated or
 
 Let's go back to the original question: what happens when you run an executable program on your computer? First, a bunch of magic happens to get ready to run it — we’ll work through all of this later — but at the end of the process there’s machine code in a file somewhere. The operating system loads this into RAM and instructs the CPU to jump the instruction pointer to that position in RAM. The CPU continues running its fetch-execute cycle as usual, so the program begins executing!
 
-(This was one of those psyching-myself-out moments for me — seriously, this is how the program you are using to read this article is running! Your CPU is fetching your browser's instructions from RAM in sequence and directly executing them, and they're rendering this article.)
+For this discussion, it’s sufficient to adopt a simplified view of the CPU as an entity that executes instructions sequentially. While, in reality, parallelism occurs at multiple levels—such as through multiple physical cores, hyper-threading, and speculative execution—this simplified view will be adequate for our purposes.
 
 <img src='/images/instruction-pointer.png' loading='lazy' style='max-width: 400px;' alt='A diagram depicting a series of bytes of machine code in RAM. A highlighted byte is pointed to by an arrow labeled "Instruction Pointer," and there are arrows representing how the instruction pointer moves forward in RAM.' width='935' height='372' />
 
