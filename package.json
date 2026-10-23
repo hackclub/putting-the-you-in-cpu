@@ -13,7 +13,7 @@
 		"@astrojs/markdown-remark": "^7.3.3",
 		"@astrojs/mdx": "^8.1.0",
 		"@astrojs/sitemap": "^3.7.4",
-		"@astrojs/vercel": "^11.0.15",
+		"@astrojs/vercel": "^11.0.16",
 		"@types/jsdom": "^30.0.0",
 		"astro": "^7.4.0",
 		"jsdom": "^30.1.3",
